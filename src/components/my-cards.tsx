@@ -84,7 +84,7 @@ export default function MyCards() {
       </div>
 
       <div className="relative">
-        <div className="embla overflow-hidden" ref={emblaRef}>
+        <div className="embla overflow-hidden py-2" ref={emblaRef}>
           <div className="embla__container flex">
             {cards.map((card) => (
               <div key={card.id} className="embla__slide flex-shrink-0 mr-6">

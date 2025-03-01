@@ -117,8 +117,8 @@ export default function WeeklyActivity() {
   };
 
   const buttonClasses = `
-    flex items-center justify-center px-3 py-2
-    bg-gray-100 rounded-md text-sm font-medium text-gray-700
+    flex items-center justify-center
+    bg-gray-100 rounded-md text-gray-700
     hover:bg-[#232323] hover:text-white
     focus:outline-none focus:ring-0
     transition-colors duration-200 ease-in-out
@@ -129,19 +129,20 @@ export default function WeeklyActivity() {
       <div className="flex justify-between items-center mb-4">
         <motion.button
           onClick={() => dispatch(setPreviousWeek())}
-          className={`${buttonClasses} cursor-pointer`}
+          className={`${buttonClasses} h-8 px-2 sm:px-3 cursor-pointer`}
           variants={buttonVariants}
           whileHover="hover"
-          whileTap="tap">
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Previous Week
+          whileTap="tap"
+          aria-label="Previous Week">
+          <ChevronLeft className="h-4 w-4 sm:mr-1" />
+          <span className="hidden sm:inline text-sm">Previous</span>
         </motion.button>
         <span className="text-sm font-medium">
           Week {weekNumber}, {year}
         </span>
         <motion.button
           onClick={() => canGoToNextWeek && dispatch(setNextWeek())}
-          className={`${buttonClasses} ${
+          className={`${buttonClasses} h-8 px-2 sm:px-3 ${
             canGoToNextWeek
               ? 'cursor-pointer'
               : 'opacity-50 cursor-not-allowed hover:bg-gray-100 hover:text-gray-700'
@@ -149,9 +150,10 @@ export default function WeeklyActivity() {
           variants={buttonVariants}
           whileHover={canGoToNextWeek ? 'hover' : ''}
           whileTap={canGoToNextWeek ? 'tap' : ''}
-          disabled={!canGoToNextWeek}>
-          Next Week
-          <ChevronRight className="h-4 w-4 ml-2" />
+          disabled={!canGoToNextWeek}
+          aria-label="Next Week">
+          <span className="hidden sm:inline text-sm">Next</span>
+          <ChevronRight className="h-4 w-4 sm:ml-1" />
         </motion.button>
       </div>
       <div className="h-64">

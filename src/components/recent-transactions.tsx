@@ -69,8 +69,8 @@ export default function RecentTransactions() {
                 <div
                   className={`text-sm font-medium ${transaction.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {transaction.amount > 0
-                    ? `+$${transaction.amount.toLocaleString()}`
-                    : `-$${Math.abs(transaction.amount).toLocaleString()}`}
+                    ? `+$${transaction.amount.toFixed(2)}`
+                    : `-$${Math.abs(transaction.amount).toFixed(2)}`}
                 </div>
                 <p className="text-xs text-gray-500">{transaction.description}</p>
               </div>

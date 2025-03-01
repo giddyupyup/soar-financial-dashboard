@@ -127,8 +127,6 @@ export default function Settings() {
   return (
     <div className="p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-6">Setting</h1>
-
         <div className="bg-white rounded-xl shadow-sm">
           <div className="border-b border-gray-200">
             <div className="flex space-x-8 px-6">

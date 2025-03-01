@@ -11,8 +11,6 @@ export default function CreditCards() {
   return (
     <div className="p-4 md:p-6">
       <div className="max-w-[1920px] mx-auto">
-        <h1 className="text-2xl font-semibold text-[#2D3B72] mb-6">Credit Cards</h1>
-
         <div
           className="grid gap-6"
           style={{
