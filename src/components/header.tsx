@@ -1,10 +1,12 @@
 'use client';
 
-import { Search, Menu, Settings, Bell } from 'lucide-react';
+import { Search, Menu, Settings, Bell, User } from 'lucide-react';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import { useMediaQuery } from '@/hooks/use-media-query';
+import type { RootState } from '@/store/store';
 
 import MobileMenu from './mobile-menu';
 
@@ -12,6 +14,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const location = useLocation();
+  const user = useSelector((state: RootState) => state.user);
 
   // Get the current page title based on the path
   const getPageTitle = () => {
@@ -65,11 +68,17 @@ export default function Header() {
               </>
             )}
             <button className="flex items-center focus:outline-none">
-              <img
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-ItsODbBKgYoOqqwsEFA6chJvoFrW6p.png"
-                alt="User profile"
-                className="h-8 w-8 rounded-full object-cover"
-              />
+              {user.avatar ? (
+                <img
+                  src={user.avatar || '/placeholder.svg'}
+                  alt="User profile"
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                  <User className="h-5 w-5 text-gray-500" />
+                </div>
+              )}
             </button>
           </div>
         </div>

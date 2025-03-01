@@ -4,7 +4,14 @@ interface UserState {
   id: string;
   name: string;
   email: string;
-  avatar: string;
+  avatar?: string;
+  userName: string;
+  dateOfBirth: string;
+  presentAddress: string;
+  permanentAddress: string;
+  city: string;
+  postalCode: string;
+  country: string;
 }
 
 const initialState: UserState = {
@@ -12,6 +19,13 @@ const initialState: UserState = {
   name: '',
   email: '',
   avatar: '',
+  userName: '',
+  dateOfBirth: '',
+  presentAddress: '',
+  permanentAddress: '',
+  city: '',
+  postalCode: '',
+  country: '',
 };
 
 const userSlice = createSlice({

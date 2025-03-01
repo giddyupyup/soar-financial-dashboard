@@ -22,7 +22,13 @@ export default function InitializeStore() {
         id: '1',
         name: 'John Doe',
         email: 'john@example.com',
-        avatar: '/placeholder.svg?height=128&width=128',
+        userName: 'johndoe',
+        dateOfBirth: '1990-01-25',
+        presentAddress: '123 Main St, San Jose, CA 95123',
+        permanentAddress: '456 Oak Ave, San Jose, CA 95124',
+        city: 'San Jose',
+        postalCode: '95123',
+        country: 'USA',
       }),
     );
 

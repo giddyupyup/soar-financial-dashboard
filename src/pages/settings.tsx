@@ -1,10 +1,10 @@
 'use client';
-
 import { AnimatePresence, motion } from 'framer-motion';
-import { Pencil, ChevronDown, Loader2, Upload } from 'lucide-react';
+import { Pencil, ChevronDown, Loader2, Upload, User } from 'lucide-react';
 import type React from 'react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -15,9 +15,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { updateUserProfile } from '@/store/slices/userSlice';
+import type { RootState } from '@/store/store';
 
 type FormData = {
-  yourName: string;
+  name: string;
   userName: string;
   email: string;
   password: string;
@@ -34,36 +36,61 @@ export default function Settings() {
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [profileImage, setProfileImage] = useState(
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-ItsODbBKgYoOqqwsEFA6chJvoFrW6p.png',
-  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.user);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<FormData>({
     defaultValues: {
-      yourName: 'Charlene Reed',
-      userName: 'Charlene Reed',
-      email: 'charlenereed@gmail.com',
+      name: user.name,
+      userName: user.userName,
+      email: user.email,
       password: '**********',
-      dateOfBirth: '25 January 1990',
-      presentAddress: 'San Jose, California, USA',
-      permanentAddress: 'San Jose, California, USA',
-      city: 'San Jose',
-      postalCode: '45962',
-      country: 'USA',
+      dateOfBirth: user.dateOfBirth,
+      presentAddress: user.presentAddress,
+      permanentAddress: user.permanentAddress,
+      city: user.city,
+      postalCode: user.postalCode,
+      country: user.country,
     },
   });
+  useEffect(() => {
+    setValue('name', user.name);
+    setValue('userName', user.userName);
+    setValue('email', user.email);
+    setValue('dateOfBirth', user.dateOfBirth);
+    setValue('presentAddress', user.presentAddress);
+    setValue('permanentAddress', user.permanentAddress);
+    setValue('city', user.city);
+    setValue('postalCode', user.postalCode);
+    setValue('country', user.country);
+  }, [user, setValue]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (data: FormData) => {
     setIsSaving(true);
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 2000));
     setIsSaving(false);
+    dispatch(
+      updateUserProfile({
+        name: data.name,
+        userName: data.userName,
+        email: data.email,
+        dateOfBirth: data.dateOfBirth,
+        presentAddress: data.presentAddress,
+        permanentAddress: data.permanentAddress,
+        city: data.city,
+        postalCode: data.postalCode,
+        country: data.country,
+      }),
+    );
     toast.success('Settings saved successfully!');
     setIsSaved(true);
 
@@ -83,7 +110,8 @@ export default function Settings() {
       // Update profile image (in a real scenario, this would be the URL returned from the server)
       const reader = new FileReader();
       reader.onload = (e) => {
-        setProfileImage(e.target?.result as string);
+        const newAvatarUrl = e.target?.result as string;
+        dispatch(updateUserProfile({ avatar: newAvatarUrl }));
       };
       reader.readAsDataURL(file);
 
@@ -141,13 +169,19 @@ export default function Settings() {
                   {/* Profile Image Section - Left Side on Desktop */}
                   <div className="flex flex-col items-center md:items-start mb-8 md:mb-0 md:w-48">
                     <div className="relative">
-                      <img
-                        src={profileImage || '/placeholder.svg'}
-                        alt="Profile"
-                        width={128}
-                        height={128}
-                        className="w-32 h-32 rounded-full object-cover"
-                      />
+                      {user.avatar ? (
+                        <img
+                          src={user.avatar || '/placeholder.svg'}
+                          alt="Profile"
+                          width={128}
+                          height={128}
+                          className="w-32 h-32 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center">
+                          <User className="h-16 w-16 text-gray-500" />
+                        </div>
+                      )}
                       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                           <button className="absolute bottom-0 right-0 bg-gray-900 text-white p-2 rounded-full hover:bg-gray-800 transition-colors cursor-pointer">
@@ -212,14 +246,14 @@ export default function Settings() {
                           Your Name
                         </label>
                         <input
-                          {...register('yourName', { required: 'Your name is required' })}
+                          {...register('name', { required: 'Your name is required' })}
                           className={`w-full px-4 py-2.5 border ${
-                            errors.yourName ? 'border-red-500' : 'border-gray-200'
+                            errors.name ? 'border-red-500' : 'border-gray-200'
                           } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600`}
                           placeholder="Enter your name"
                         />
-                        {errors.yourName && (
-                          <p className="mt-1 text-xs text-red-500">{errors.yourName.message}</p>
+                        {errors.name && (
+                          <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>
                         )}
                       </div>
 
