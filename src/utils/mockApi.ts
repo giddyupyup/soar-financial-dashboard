@@ -162,7 +162,7 @@ export const fetchWeeklyActivity = async (
       day: format(date, 'EEE'),
       date: format(date, 'yyyy-MM-dd'),
       withdraw: isPastOrToday ? Math.floor(Math.random() * 400) : 0,
-      deposit: isPastOrToday ? Math.floor(Math.random() * 600) : 0,
+      deposit: isPastOrToday ? Math.floor(Math.random() * 500) : 0,
     };
   });
 };
@@ -188,7 +188,7 @@ export const fetchExpenseStatistics = async (userId: string): Promise<ExpenseSta
   await new Promise((resolve) => setTimeout(resolve, 500));
   const { getAmount } = generateMockData(userId, 5);
 
-  const categories = ['Food', 'Transport', 'Entertainment', 'Bills'];
+  const categories = ['Bills', 'Others', 'Investment', 'Entertainment'];
   const total = categories.reduce((sum) => sum + getAmount(100, 1000), 0);
 
   return categories.map((category) => {
@@ -211,7 +211,7 @@ export const fetchBalanceHistory = async (userId: string): Promise<BalanceHistor
       const date = subMonths(today, index);
       return {
         date: format(date, 'MMM'),
-        balance: getAmount(1000, 10000),
+        balance: getAmount(0, 900),
       };
     })
     .reverse();

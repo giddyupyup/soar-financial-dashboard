@@ -1,11 +1,11 @@
 'use client';
 
-import { Chart, type ChartConfiguration } from 'chart.js/auto';
+import { Chart } from 'chart.js/auto';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import ExpenseStatisticsSkeleton from '@/components/ui/skeletons/expense-statistics-skeleton';
-import { useMediaQuery } from '@/hooks/use-media-query';
 import { fetchExpenseStatisticsAsync } from '@/store/slices/expenseStatisticsSlice';
 import type { AppDispatch, RootState } from '@/store/store';
 
@@ -14,7 +14,7 @@ import DashboardContainer from './dashboard-container';
 export default function ExpenseStatistics() {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
-  const isMobile = useMediaQuery('(max-width: 768px)');
+
   const dispatch = useDispatch<AppDispatch>();
   const { expenses, status } = useSelector((state: RootState) => state.expenseStatistics);
 
@@ -25,73 +25,69 @@ export default function ExpenseStatistics() {
   }, [dispatch, status]);
 
   useEffect(() => {
-    if (chartRef.current) {
+    if (chartRef.current && expenses.length > 0) {
       const ctx = chartRef.current.getContext('2d');
 
       if (ctx) {
-        // Destroy previous chart instance if it exists
         if (chartInstance.current) {
           chartInstance.current.destroy();
         }
 
-        const data = {
-          labels: expenses.map((expense) => expense.category),
-          datasets: [
-            {
-              data: expenses.map((expense) => expense.percentage),
-              backgroundColor: [
-                '#2D3B72', // Entertainment - navy blue
-                '#FF8C42', // Bill Expense - orange
-                '#4F7DF3', // Investment - bright blue
-                '#2A2A2A', // Others - black
-              ],
-              borderWidth: 0,
-            },
-          ],
-        };
-
-        const config: ChartConfiguration = {
+        chartInstance.current = new Chart(ctx, {
           type: 'pie',
-          data: data,
+          plugins: [ChartDataLabels],
+          data: {
+            labels: expenses.map((expense) => expense.category),
+            datasets: [
+              {
+                data: expenses.map((expense) => expense.amount),
+                backgroundColor: ['#FC7900', '#232323', '#396AFF', '#343C6A'],
+                borderColor: 'white',
+                borderWidth: 1,
+                offset: [10, 30, 5, 50],
+              },
+            ],
+          },
           options: {
             responsive: true,
-            maintainAspectRatio: false,
             plugins: {
               legend: {
-                position: isMobile ? 'bottom' : 'right',
-                labels: {
-                  boxWidth: 10,
-                  padding: 20,
-                  font: {
-                    size: 12,
-                  },
-                },
+                display: false,
               },
               tooltip: {
-                callbacks: {
-                  label: (context) => {
-                    const label = context.label || '';
-                    const value = context.raw as number;
-                    return `${label}: ${value}%`;
-                  },
+                enabled: false,
+              },
+              datalabels: {
+                color: '#ffffff',
+                textAlign: 'center',
+                font: {
+                  weight: 'bold',
+                  size: 14,
+                },
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                formatter: (value: number, context: any) => {
+                  const dataset = context.chart.data.datasets[0];
+                  const total = dataset.data.reduce((acc: number, data: number) => acc + data, 0);
+                  const percentage = ((value / Number(total)) * 100).toFixed(1);
+                  const label = context.chart.data.labels[context.dataIndex];
+                  return [`${percentage}%`, `${label}`];
                 },
               },
             },
+            layout: {
+              padding: 20,
+            },
           },
-        };
-
-        // Create new chart
-        chartInstance.current = new Chart(ctx, config);
+        });
       }
     }
 
-    // Cleanup function
     return () => {
       if (chartInstance.current) {
         chartInstance.current.destroy();
       }
     };
-  }, [isMobile, expenses]);
+  }, [expenses]);
 
   if (status === 'idle' || status === 'loading') {
     return <ExpenseStatisticsSkeleton />;
@@ -99,7 +95,7 @@ export default function ExpenseStatistics() {
 
   return (
     <DashboardContainer title="Expense Statistics">
-      <div className={`${isMobile ? 'h-[300px]' : 'h-[280px]'}`}>
+      <div className={`h-[300px] flex items-center justify-center`}>
         <canvas ref={chartRef}></canvas>
       </div>
     </DashboardContainer>

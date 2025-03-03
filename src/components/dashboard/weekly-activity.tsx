@@ -55,18 +55,22 @@ export default function WeeklyActivity() {
             labels: activities.map((activity) => activity.day),
             datasets: [
               {
-                label: 'Deposit',
-                data: activities.map((activity) => activity.deposit),
-                backgroundColor: '#4F7DF3',
-                borderRadius: 8,
-                barThickness: 16,
-              },
-              {
                 label: 'Withdraw',
                 data: activities.map((activity) => activity.withdraw),
                 backgroundColor: '#000000',
                 borderRadius: 8,
-                barThickness: 16,
+                borderSkipped: false,
+                barPercentage: 0.6,
+                categoryPercentage: 0.5,
+              },
+              {
+                label: 'Deposit',
+                data: activities.map((activity) => activity.deposit),
+                backgroundColor: '#4F7DF3',
+                borderRadius: 8,
+                borderSkipped: false,
+                barPercentage: 0.6,
+                categoryPercentage: 0.5,
               },
             ],
           },
@@ -77,6 +81,7 @@ export default function WeeklyActivity() {
               legend: {
                 position: 'top',
                 align: 'end',
+                reverse: true,
                 labels: {
                   usePointStyle: true,
                   pointStyle: 'circle',
@@ -100,18 +105,16 @@ export default function WeeklyActivity() {
               },
               y: {
                 beginAtZero: true,
-                max: 600,
+                max: 500,
                 ticks: {
                   stepSize: 100,
                   color: '#64748b',
                   font: { size: 12 },
                 },
-                grid: { color: '#e2e8f0' },
+                grid: { color: '#F3F3F5' },
                 border: { display: false },
               },
             },
-            barPercentage: 0.5,
-            categoryPercentage: 0.7,
           },
         } as ChartConfiguration);
       }

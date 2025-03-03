@@ -35,7 +35,10 @@ export default function BalanceHistory() {
           chartInstance.current.destroy();
         }
 
-        // Create new chart
+        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+        gradient.addColorStop(0, 'rgba(45, 96, 255, 0.25)');
+        gradient.addColorStop(1, 'rgba(45, 96, 255, 0)');
+
         chartInstance.current = new Chart(ctx, {
           type: 'line',
           data: {
@@ -44,8 +47,8 @@ export default function BalanceHistory() {
               {
                 label: 'Balance',
                 data: history.map((entry) => entry.balance),
-                borderColor: '#4F7DF3',
-                backgroundColor: 'rgba(79, 125, 243, 0.1)',
+                borderColor: '#1814F3',
+                backgroundColor: gradient,
                 tension: 0.4,
                 fill: true,
                 pointRadius: 0,
@@ -70,7 +73,7 @@ export default function BalanceHistory() {
             scales: {
               x: {
                 grid: {
-                  display: false,
+                  color: '#DFE5EE',
                 },
                 ticks: {
                   font: {
@@ -78,10 +81,14 @@ export default function BalanceHistory() {
                   },
                   color: '#64748B',
                 },
+                border: {
+                  dash: [4, 4],
+                },
               },
               y: {
                 beginAtZero: true,
                 ticks: {
+                  stepSize: 200,
                   callback: (value) => `$${value}`,
                   font: {
                     size: 12,
@@ -89,10 +96,10 @@ export default function BalanceHistory() {
                   color: '#64748B',
                 },
                 grid: {
-                  color: '#E2E8F0',
+                  color: '#DFE5EE',
                 },
                 border: {
-                  display: false,
+                  dash: [4, 4],
                 },
               },
             },
