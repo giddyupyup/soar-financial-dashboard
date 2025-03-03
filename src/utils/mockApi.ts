@@ -40,7 +40,7 @@ const users: Record<string, UserData> = {
 };
 
 // Helper function to generate consistent mock data based on userId
-const generateMockData = (userId: string, seed: number) => {
+const generateMockData = (_: string, seed: number) => {
   const rng = (seed: number) => {
     const x = Math.sin(seed++) * 10000;
     return x - Math.floor(x);
@@ -149,7 +149,7 @@ export const fetchTransactions = async (userId: string): Promise<Transaction[]> 
 };
 
 export const fetchWeeklyActivity = async (
-  userId: string,
+  _: string,
   currentWeekStart: string,
 ): Promise<DailyActivity[]> => {
   await new Promise((resolve) => setTimeout(resolve, 500));

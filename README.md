@@ -1,54 +1,140 @@
-# React + TypeScript + Vite
+# Soar Task Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Soar Task Dashboard is a modern, responsive financial dashboard application built with React, React-Router and Redux. It provides users with an overview of their financial data, including credit cards, transactions, and expense statistics.
 
-Currently, two official plugins are available:
+**Note:** The GitHub repository for this project is currently inaccessible. This README is based on previous discussions about the project's features and structure.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+- Responsive design for desktop and mobile devices
+- Interactive charts and graphs for financial data visualization
+- Real-time data updates using Redux
+- Customizable user settings
+- Mock API for development and testing
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Prerequisites
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+Before you begin, ensure you have met the following requirements:
+
+- [Node.js](https://nodejs.org/) (v14.0.0 or later)
+- [npm](https://www.npmjs.com/) (v8 or higher) or [yarn](https://yarnpkg.com/)
+- [Vercel CLI](https://vercel.com/docs/cli) (for deployment)
+
+## Installation
+
+1. Clone the repository (when available):
+
+   ```bash
+   git clone https://github.com/giddyupyup/soar-financial-dashboard.git
+   ```
+
+2. Navigate to the project directory:
+
+   ```bash
+   cd soar-financial-dashboard
+   ```
+
+3. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+   or
+
+   ```bash
+   yarn install
+   ```
+
+## Usage
+
+### Development
+
+Start the development server with hot-reloading:
+
+```bash
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+or
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+yarn dev
 ```
+
+Visit `http://localhost:5173` in your browser (port may vary—check terminal output).
+
+### Build
+
+Generate an optimized production build:
+
+```bash
+npm run build
+```
+
+or
+
+```bash
+yarn build
+```
+
+Output is in the `dist` folder.
+
+### Preview
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+or
+
+```bash
+yarn preview
+```
+
+Visit `http://localhost:4173` in your browser (port may vary—check terminal output).
+
+## Deployment to Vercel
+
+Deploy your dashboard to Vercel for a live, hosted version.
+
+### Prerequisites
+
+- A Vercel account
+- [Vercel CLI](https://vercel.com/docs/cli) installed:
+  ```bash
+  npm install -g vercel
+  ```
+
+### Steps
+
+1. **Login to Vercel CLI**:
+
+   ```bash
+   vercel login
+   ```
+
+   Follow the authentication prompts.
+
+2. **Deploy the Project**: Run from the project root:
+
+   ```bash
+   vercel
+   ```
+
+   - Vercel auto-detects the Vite.js setup.
+   - Respond to prompts (e.g., project name, dist directory).
+
+3. **Environment Variables** (Optional): Add variables (e.g., API keys) in the Vercel dashboard:
+
+- Go to your project in Vercel.
+- Navigate to Settings > Environment Variables.
+- Example: VITE_API_KEY=your-api-key.
+
+4. **Custom Domain** (Optional):
+
+- In the Vercel dashboard, under Domains, add your custom domain.
+
+5. **Access Your Deployment**: Vercel provides a URL (e.g., https://soar-financial-dashboard.vercel.app) after deployment.
