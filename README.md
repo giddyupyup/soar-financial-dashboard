@@ -2,15 +2,19 @@
 
 Soar Task Dashboard is a modern, responsive financial dashboard application built with React, React-Router and Redux. It provides users with an overview of their financial data, including credit cards, transactions, and expense statistics.
 
-**Note:** The GitHub repository for this project is currently inaccessible. This README is based on previous discussions about the project's features and structure.
-
 ## Features
 
-- Responsive design for desktop and mobile devices
-- Interactive charts and graphs for financial data visualization
-- Real-time data updates using Redux
-- Customizable user settings
-- Mock API for development and testing
+- **Real-time Financial Updates**: APIs are mocked to simulate real-time updates, seamlessly integrated with Redux state management.
+- **Centralized State Management**: Redux handles application state, ensuring consistent data flow across components.
+- **Smooth User Experience**: Initial loading screens enhance UX during data fetching or page transitions.
+- **Quick Transfer Functionality**: Add recent transactions with a simple amount input, featuring toast notifications for successful transfers.
+- **Profile Upload Feature**: Upload a profile picture directly from the Settings page, stored in Redux state.
+- **Edit User Profiles**: Update user details (e.g., name, email) with real-time feedback in the Settings page.
+- **Weekly Activity Navigation**: View financial transactions by week, with options to navigate to the previous or next week.
+- **Data Visualization with Chart.js**: Visualize financial data (e.g., weekly transactions) using interactive charts powered by Chart.js.
+- **Load Optimization with React.lazy and Suspense**: Optimize performance by lazy-loading components like Dashboard and Settings, with Suspense for fallback UI.
+- Multi-page navigation with React Router
+- Responsive design styled with Tailwind CSS
 
 ## Prerequisites
 
@@ -104,6 +108,7 @@ Deploy your dashboard to Vercel for a live, hosted version.
 
 - A Vercel account
 - [Vercel CLI](https://vercel.com/docs/cli) installed:
+
   ```bash
   npm install -g vercel
   ```
@@ -129,12 +134,12 @@ Deploy your dashboard to Vercel for a live, hosted version.
 
 3. **Environment Variables** (Optional): Add variables (e.g., API keys) in the Vercel dashboard:
 
-- Go to your project in Vercel.
-- Navigate to Settings > Environment Variables.
-- Example: VITE_API_KEY=your-api-key.
+   - Go to your project in Vercel.
+   - Navigate to Settings > Environment Variables.
+   - Example: VITE_API_KEY=your-api-key.
 
 4. **Custom Domain** (Optional):
 
-- In the Vercel dashboard, under Domains, add your custom domain.
+   - In the Vercel dashboard, under Domains, add your custom domain.
 
 5. **Access Your Deployment**: Vercel provides a URL (e.g., https://soar-financial-dashboard.vercel.app) after deployment.
