@@ -4,7 +4,7 @@ import { Chart, registerables, type ChartConfiguration } from 'chart.js';
 import { format, getWeek, parseISO, startOfWeek, isSameDay } from 'date-fns';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
@@ -15,18 +15,17 @@ import {
 import type { RootState, AppDispatch } from '@/store/store';
 
 import DashboardContainer from './dashboard-container';
+import WeeklyActivitySkeleton from './weekly-activity-skeleton';
 
 Chart.register(...registerables);
 
 export default function WeeklyActivity() {
-  const [isLoading, setIsLoading] = useState(true);
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
   const dispatch = useDispatch<AppDispatch>();
   const { activities, currentWeekStart, status } = useSelector(
     (state: RootState) => state.weeklyActivity,
   );
-  const userId = useSelector((state: RootState) => state.user.id);
 
   const currentWeekStartDate = startOfWeek(new Date(), { weekStartsOn: 0 });
   const displayedWeekStart = parseISO(currentWeekStart);
@@ -36,16 +35,10 @@ export default function WeeklyActivity() {
   const year = format(displayedWeekStart, 'yyyy');
 
   useEffect(() => {
-    if (status === 'idle' && userId) {
-      dispatch(fetchWeeklyActivityAsync(userId));
+    if (status === 'idle') {
+      dispatch(fetchWeeklyActivityAsync());
     }
-    if (status === 'loading') {
-      setIsLoading(true);
-    }
-    if (status === 'succeeded') {
-      setIsLoading(false);
-    }
-  }, [dispatch, status, userId]);
+  }, [dispatch, status]);
 
   useEffect(() => {
     if (chartRef.current && activities.length > 0) {
@@ -144,19 +137,8 @@ export default function WeeklyActivity() {
     transition-colors duration-200 ease-in-out
   `;
 
-  if (isLoading) {
-    return (
-      <DashboardContainer title="Weekly Activity">
-        <div className="animate-pulse">
-          <div className="flex justify-between items-center mb-4">
-            <div className="h-8 w-24 bg-gray-200 rounded"></div>
-            <div className="h-8 w-32 bg-gray-200 rounded"></div>
-            <div className="h-8 w-24 bg-gray-200 rounded"></div>
-          </div>
-          <div className="h-64 bg-gray-200 rounded"></div>
-        </div>
-      </DashboardContainer>
-    );
+  if (status === 'idle' || status === 'loading') {
+    return <WeeklyActivitySkeleton />;
   }
 
   return (

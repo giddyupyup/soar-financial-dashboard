@@ -1,23 +1,28 @@
 'use client';
 
 import './index.css';
+import React, { Suspense } from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
-import AppRoutes from '@/routes';
+import InitializeStore from '@/components/initialize-store';
 import { store } from '@/store/store';
 
-import InitializeStore from './components/initialize-store';
+import LayoutSkeleton from './components/layout-skeleton';
+
+const AppRoutes = React.lazy(() => import('@/routes'));
 
 export default function App() {
   return (
     <>
-      <Toaster />
       <Router>
         <Provider store={store}>
           <InitializeStore />
-          <AppRoutes />
+          <Suspense fallback={<LayoutSkeleton />}>
+            <Toaster />
+            <AppRoutes />
+          </Suspense>
         </Provider>
       </Router>
     </>

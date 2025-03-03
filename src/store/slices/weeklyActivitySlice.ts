@@ -1,7 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { startOfWeek, addDays, format, isBefore, parseISO } from 'date-fns';
 
+import type { DailyActivity } from '@/types';
 import { fetchWeeklyActivity } from '@/utils/mockApi';
+
+import { AppDispatch, RootState } from '../store';
 
 interface WeeklyActivityState {
   currentWeekStart: string;
@@ -17,14 +20,17 @@ const initialState: WeeklyActivityState = {
   error: null,
 };
 
-export const fetchWeeklyActivityAsync = createAsyncThunk(
-  'weeklyActivity/fetchWeeklyActivity',
-  async (userId: string, { getState }) => {
-    const state = getState() as { weeklyActivity: WeeklyActivityState };
-    const currentWeekStart = state.weeklyActivity.currentWeekStart;
-    return await fetchWeeklyActivity(userId, currentWeekStart);
-  },
-);
+export const fetchWeeklyActivityAsync = createAsyncThunk<
+  DailyActivity[],
+  void,
+  { state: RootState; dispatch: AppDispatch }
+>('weeklyActivity/fetchWeeklyActivity', async (_, { getState }) => {
+  const state = getState();
+  console.log('state', { ...state });
+  const userId = state.user.id;
+  const currentWeekStart = state.weeklyActivity.currentWeekStart;
+  return await fetchWeeklyActivity(userId, currentWeekStart);
+});
 
 const weeklyActivitySlice = createSlice({
   name: 'weeklyActivity',
@@ -53,8 +59,7 @@ const weeklyActivitySlice = createSlice({
         state.status = 'loading';
       })
       .addCase(fetchWeeklyActivityAsync.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.activities = action.payload;
+        return { ...state, activities: action.payload, status: 'succeeded' };
       })
       .addCase(fetchWeeklyActivityAsync.rejected, (state, action) => {
         state.status = 'failed';

@@ -1,39 +1,32 @@
 'use client';
 
 import { Chart, registerables } from 'chart.js';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { fetchBalanceHistoryAsync } from '@/store/slices/balanceHistorySlice';
 import type { AppDispatch, RootState } from '@/store/store';
 
+import BalanceHistorySkeleton from './balance-history-skeleton';
 import DashboardContainer from './dashboard-container';
 
 Chart.register(...registerables);
 
 export default function BalanceHistory() {
-  const [isLoading, setIsLoading] = useState(true);
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
 
   const dispatch = useDispatch<AppDispatch>();
   const { history, status } = useSelector((state: RootState) => state.balanceHistory);
-  const userId = useSelector((state: RootState) => state.user.id);
 
   useEffect(() => {
-    if (status === 'idle' && userId) {
-      dispatch(fetchBalanceHistoryAsync(userId));
+    if (status === 'idle') {
+      dispatch(fetchBalanceHistoryAsync());
     }
-    if (status === 'loading') {
-      setIsLoading(true);
-    }
-    if (status === 'succeeded') {
-      setIsLoading(false);
-    }
-  }, [dispatch, status, userId]);
+  }, [dispatch, status]);
 
   useEffect(() => {
-    if (chartRef.current && history.length > 0) {
+    if (chartRef.current) {
       const ctx = chartRef.current.getContext('2d');
 
       if (ctx) {
@@ -116,12 +109,8 @@ export default function BalanceHistory() {
     };
   }, [history]);
 
-  if (isLoading) {
-    return (
-      <DashboardContainer title="Balance History">
-        <div className="h-64 bg-gray-200 rounded animate-pulse"></div>
-      </DashboardContainer>
-    );
+  if (status === 'idle' || status === 'loading') {
+    return <BalanceHistorySkeleton />;
   }
 
   return (

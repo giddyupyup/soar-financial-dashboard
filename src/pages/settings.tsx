@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
+import SettingsSkeleton from '@/components/settings-skeleton';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -60,6 +61,8 @@ export default function Settings() {
 
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user);
+
+  const { status } = user;
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -117,6 +120,10 @@ export default function Settings() {
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
+
+  if (status === 'idle' || status === 'loading') {
+    return <SettingsSkeleton />;
+  }
 
   return (
     <div className="p-4 md:p-6">
@@ -232,7 +239,7 @@ export default function Settings() {
                             <FormItem>
                               <FormLabel>Your Name</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} disabled={isSaving || isSaved} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -246,7 +253,7 @@ export default function Settings() {
                             <FormItem>
                               <FormLabel>User Name</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} disabled={isSaving || isSaved} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -260,7 +267,7 @@ export default function Settings() {
                             <FormItem>
                               <FormLabel>Email</FormLabel>
                               <FormControl>
-                                <Input {...field} type="email" />
+                                <Input {...field} type="email" disabled={isSaving || isSaved} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -281,6 +288,7 @@ export default function Settings() {
                                   onChange={(e) => {
                                     field.onChange(e.target.value);
                                   }}
+                                  disabled={isSaving || isSaved}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -295,7 +303,7 @@ export default function Settings() {
                             <FormItem>
                               <FormLabel>Date of Birth</FormLabel>
                               <FormControl>
-                                <Input {...field} type="date" />
+                                <Input {...field} type="date" disabled={isSaving || isSaved} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -309,7 +317,7 @@ export default function Settings() {
                             <FormItem>
                               <FormLabel>Present Address</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} disabled={isSaving || isSaved} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -323,7 +331,7 @@ export default function Settings() {
                             <FormItem>
                               <FormLabel>Permanent Address</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} disabled={isSaving || isSaved} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -337,7 +345,7 @@ export default function Settings() {
                             <FormItem>
                               <FormLabel>City</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} disabled={isSaving || isSaved} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -351,7 +359,7 @@ export default function Settings() {
                             <FormItem>
                               <FormLabel>Postal Code</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} disabled={isSaving || isSaved} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -365,7 +373,7 @@ export default function Settings() {
                             <FormItem>
                               <FormLabel>Country</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Input {...field} disabled={isSaving || isSaved} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

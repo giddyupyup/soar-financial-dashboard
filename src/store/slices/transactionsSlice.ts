@@ -3,6 +3,8 @@ import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/tool
 import type { Transaction } from '@/types';
 import { fetchTransactions } from '@/utils/mockApi';
 
+import { AppDispatch, RootState } from '../store';
+
 interface TransactionsState {
   transactions: Transaction[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -15,13 +17,16 @@ const initialState: TransactionsState = {
   error: null,
 };
 
-export const fetchTransactionsAsync = createAsyncThunk(
-  'transactions/fetchTransactions',
-  async (userId: string) => {
-    const response = await fetchTransactions(userId);
-    return response;
-  },
-);
+export const fetchTransactionsAsync = createAsyncThunk<
+  Transaction[],
+  void,
+  { state: RootState; dispatch: AppDispatch }
+>('transactions/fetchTransactions', async (_, { getState }) => {
+  const state = getState();
+  const userId = state.user.id;
+  const response = await fetchTransactions(userId);
+  return response;
+});
 
 const transactionsSlice = createSlice({
   name: 'transactions',
@@ -50,8 +55,7 @@ const transactionsSlice = createSlice({
         state.status = 'loading';
       })
       .addCase(fetchTransactionsAsync.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.transactions = action.payload;
+        return { ...state, transactions: action.payload, status: 'succeeded' };
       })
       .addCase(fetchTransactionsAsync.rejected, (state, action) => {
         state.status = 'failed';

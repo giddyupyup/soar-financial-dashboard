@@ -1,9 +1,18 @@
-import BalanceHistory from '@/components/balance-history';
-import ExpenseStatistics from '@/components/expense-statistics';
-import MyCards from '@/components/my-cards';
-import QuickTransfer from '@/components/quick-transfer';
-import RecentTransactions from '@/components/recent-transactions';
-import WeeklyActivity from '@/components/weekly-activity';
+import React, { Suspense } from 'react';
+
+import BalanceHistorySkeleton from '@/components/balance-history-skeleton';
+import CardsSkeleton from '@/components/cards-skeletion';
+import ExpenseStatisticsSkeleton from '@/components/expense-statistics-skeleton';
+import QuickTransferSkeleton from '@/components/quick-transfer-skeleton';
+import RecentTransactionsSkeleton from '@/components/recent-transactions-skeleton';
+import WeeklyActivitySkeleton from '@/components/weekly-activity-skeleton';
+
+const BalanceHistory = React.lazy(() => import('@/components/balance-history'));
+const ExpenseStatistics = React.lazy(() => import('@/components/expense-statistics'));
+const MyCards = React.lazy(() => import('@/components/my-cards'));
+const QuickTransfer = React.lazy(() => import('@/components/quick-transfer'));
+const RecentTransactions = React.lazy(() => import('@/components/recent-transactions'));
+const WeeklyActivity = React.lazy(() => import('@/components/weekly-activity'));
 
 export default function Dashboard() {
   return (
@@ -12,30 +21,42 @@ export default function Dashboard() {
         {/* My Cards and Recent Transactions */}
         <div className="pt-3 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
           <div className="min-h-0 lg:col-span-2">
-            <MyCards />
+            <Suspense fallback={<CardsSkeleton />}>
+              <MyCards />
+            </Suspense>
           </div>
           <div className="min-h-0">
-            <RecentTransactions />
+            <Suspense fallback={<RecentTransactionsSkeleton />}>
+              <RecentTransactions />
+            </Suspense>
           </div>
         </div>
 
         {/* Weekly Activity and Expense Statistics */}
         <div className="pt-3 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
           <div className="min-h-0 lg:col-span-2">
-            <WeeklyActivity />
+            <Suspense fallback={<WeeklyActivitySkeleton />}>
+              <WeeklyActivity />
+            </Suspense>
           </div>
           <div className="min-h-0">
-            <ExpenseStatistics />
+            <Suspense fallback={<ExpenseStatisticsSkeleton />}>
+              <ExpenseStatistics />
+            </Suspense>
           </div>
         </div>
 
         {/* Quick Transfer and Balance History */}
         <div className="pt-3 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
           <div className="min-h-0">
-            <QuickTransfer />
+            <Suspense fallback={<QuickTransferSkeleton />}>
+              <QuickTransfer />
+            </Suspense>
           </div>
           <div className="min-h-0 lg:col-span-2">
-            <BalanceHistory />
+            <Suspense fallback={<BalanceHistorySkeleton />}>
+              <BalanceHistory />
+            </Suspense>
           </div>
         </div>
       </div>

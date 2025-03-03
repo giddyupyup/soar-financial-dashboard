@@ -3,6 +3,8 @@ import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/tool
 import type { ExpenseStatistic } from '@/types';
 import { fetchExpenseStatistics } from '@/utils/mockApi';
 
+import { AppDispatch, RootState } from '../store';
+
 interface ExpenseStatisticsState {
   expenses: ExpenseStatistic[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -15,13 +17,16 @@ const initialState: ExpenseStatisticsState = {
   error: null,
 };
 
-export const fetchExpenseStatisticsAsync = createAsyncThunk(
-  'expenseStatistics/fetchExpenseStatistics',
-  async (userId: string) => {
-    const response = await fetchExpenseStatistics(userId);
-    return response;
-  },
-);
+export const fetchExpenseStatisticsAsync = createAsyncThunk<
+  ExpenseStatistic[],
+  void,
+  { state: RootState; dispatch: AppDispatch }
+>('expenseStatistics/fetchExpenseStatistics', async (_, { getState }) => {
+  const state = getState();
+  const userId = state.user.id;
+  const response = await fetchExpenseStatistics(userId);
+  return response;
+});
 
 const expenseStatisticsSlice = createSlice({
   name: 'expenseStatistics',
@@ -44,8 +49,7 @@ const expenseStatisticsSlice = createSlice({
         state.status = 'loading';
       })
       .addCase(fetchExpenseStatisticsAsync.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.expenses = action.payload;
+        return { ...state, expenses: action.payload, status: 'succeeded' };
       })
       .addCase(fetchExpenseStatisticsAsync.rejected, (state, action) => {
         state.status = 'failed';

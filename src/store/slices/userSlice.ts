@@ -25,7 +25,6 @@ const initialState: UserState = {
 
 export const fetchUser = createAsyncThunk('user/fetchUser', async (userId: string) => {
   const response = await fetchUserData(userId);
-  console.log('fetchUser', { ...response });
   return response;
 });
 
@@ -34,6 +33,7 @@ export const updateUser = createAsyncThunk(
   async (userData: Partial<UserData>) => {
     // In a real application, you would make an API call here to update the user data
     // For now, we'll just return the updated data
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return userData;
   },
 );
@@ -55,7 +55,7 @@ const userSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch user data';
       })
       .addCase(updateUser.fulfilled, (state, action: PayloadAction<Partial<UserData>>) => {
-        return { ...state, ...action.payload };
+        return { ...state, ...action.payload, status: 'succeeded' };
       });
   },
 });

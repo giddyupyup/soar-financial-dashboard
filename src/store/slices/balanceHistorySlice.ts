@@ -3,6 +3,8 @@ import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/tool
 import type { BalanceHistoryEntry } from '@/types';
 import { fetchBalanceHistory } from '@/utils/mockApi';
 
+import { AppDispatch, RootState } from '../store';
+
 interface BalanceHistoryState {
   history: BalanceHistoryEntry[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -15,13 +17,16 @@ const initialState: BalanceHistoryState = {
   error: null,
 };
 
-export const fetchBalanceHistoryAsync = createAsyncThunk(
-  'balanceHistory/fetchBalanceHistory',
-  async (userId: string) => {
-    const response = await fetchBalanceHistory(userId);
-    return response;
-  },
-);
+export const fetchBalanceHistoryAsync = createAsyncThunk<
+  BalanceHistoryEntry[],
+  void,
+  { state: RootState; dispatch: AppDispatch }
+>('balanceHistory/fetchBalanceHistory', async (_, { getState }) => {
+  const state = getState();
+  const userId = state.user.id;
+  const response = await fetchBalanceHistory(userId);
+  return response;
+});
 
 const balanceHistorySlice = createSlice({
   name: 'balanceHistory',
@@ -47,8 +52,7 @@ const balanceHistorySlice = createSlice({
         state.status = 'loading';
       })
       .addCase(fetchBalanceHistoryAsync.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.history = action.payload;
+        return { ...state, history: action.payload, status: 'succeeded' };
       })
       .addCase(fetchBalanceHistoryAsync.rejected, (state, action) => {
         state.status = 'failed';

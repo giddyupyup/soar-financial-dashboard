@@ -13,16 +13,16 @@ import type { RootState, AppDispatch } from '@/store/store';
 
 import ContactAvatar from './contact-avatar';
 import DashboardContainer from './dashboard-container';
+import QuickTransferSkeleton from './quick-transfer-skeleton';
 
 export default function QuickTransfer() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [activeContactId, setActiveContactId] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
 
   const dispatch = useDispatch<AppDispatch>();
   const { contacts, status } = useSelector((state: RootState) => state.quickTransfer);
-  const userId = useSelector((state: RootState) => state.user.id);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
@@ -31,16 +31,10 @@ export default function QuickTransfer() {
   });
 
   useEffect(() => {
-    if (status === 'idle' && userId) {
-      dispatch(fetchQuickTransferContactsAsync(userId));
+    if (status === 'idle') {
+      dispatch(fetchQuickTransferContactsAsync());
     }
-    if (status === 'loading') {
-      setIsLoading(true);
-    }
-    if (status === 'succeeded') {
-      setIsLoading(false);
-    }
-  }, [dispatch, status, userId]);
+  }, [dispatch, status]);
 
   const scrollNext = useCallback(() => {
     if (emblaApi) emblaApi.scrollNext();
@@ -74,9 +68,9 @@ export default function QuickTransfer() {
       return;
     }
 
-    setIsLoading(true);
+    setIsSending(true);
     setTimeout(() => {
-      setIsLoading(false);
+      setIsSending(false);
       setIsSent(true);
 
       const recipient = contacts.find((c) => c.id === activeContactId)?.name;
@@ -102,26 +96,8 @@ export default function QuickTransfer() {
     }, 2000);
   };
 
-  if (isLoading) {
-    return (
-      <DashboardContainer title="Quick Transfer">
-        <div className="mb-6 flex space-x-4 overflow-hidden">
-          {[1, 2, 3, 4].map((index) => (
-            <div key={index} className="flex-shrink-0 w-20">
-              <div className="w-16 h-16 bg-gray-200 rounded-full mb-2 animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
-              <div className="h-3 bg-gray-200 rounded w-3/4 mt-1 animate-pulse"></div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-auto">
-          <div className="flex items-center">
-            <div className="w-24 h-4 bg-gray-200 rounded animate-pulse mr-4"></div>
-            <div className="flex-grow h-10 bg-gray-200 rounded-full animate-pulse"></div>
-          </div>
-        </div>
-      </DashboardContainer>
-    );
+  if (status === 'idle' || status === 'loading') {
+    return <QuickTransferSkeleton />;
   }
 
   return (
@@ -171,7 +147,7 @@ export default function QuickTransfer() {
               onChange={handleAmountChange}
             />
             <AnimatePresence mode="wait">
-              {!isLoading && !isSent && (
+              {!isSending && !isSent && (
                 <motion.button
                   key="send"
                   className={`absolute right-0 top-0 h-full px-6 rounded-full flex items-center space-x-2 ${
@@ -190,7 +166,7 @@ export default function QuickTransfer() {
                   <Send className="h-4 w-4" />
                 </motion.button>
               )}
-              {isLoading && (
+              {isSending && (
                 <motion.div
                   key="loading"
                   className="absolute right-0 top-0 h-full px-6 rounded-full bg-gray-900 text-white flex items-center space-x-2 disabled"

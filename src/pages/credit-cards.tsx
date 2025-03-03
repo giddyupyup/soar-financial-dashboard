@@ -1,12 +1,26 @@
 'use client';
 
-import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Card from '@/components/card';
-import type { RootState } from '@/store/store';
+import CreditCardsSkeleton from '@/components/credit-cards-skeleton';
+import { fetchCreditCardsAsync } from '@/store/slices/creditCardsSlice';
+import type { AppDispatch, RootState } from '@/store/store';
 
 export default function CreditCards() {
-  const cards = useSelector((state: RootState) => state.creditCards.cards);
+  const dispatch = useDispatch<AppDispatch>();
+  const { cards, status } = useSelector((state: RootState) => state.creditCards);
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchCreditCardsAsync());
+    }
+  }, [dispatch, status]);
+
+  if (status === 'loading' || status === 'idle') {
+    return <CreditCardsSkeleton />;
+  }
 
   return (
     <div className="p-4 md:p-6">

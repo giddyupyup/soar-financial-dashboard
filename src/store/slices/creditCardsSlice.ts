@@ -3,6 +3,8 @@ import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/tool
 import type { CreditCard } from '@/types';
 import { fetchCreditCards } from '@/utils/mockApi';
 
+import { AppDispatch, RootState } from '../store';
+
 interface CreditCardsState {
   cards: CreditCard[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -15,13 +17,16 @@ const initialState: CreditCardsState = {
   error: null,
 };
 
-export const fetchCreditCardsAsync = createAsyncThunk(
-  'creditCards/fetchCreditCards',
-  async (userId: string) => {
-    const response = await fetchCreditCards(userId);
-    return response;
-  },
-);
+export const fetchCreditCardsAsync = createAsyncThunk<
+  CreditCard[],
+  void,
+  { state: RootState; dispatch: AppDispatch }
+>('creditCards/fetchCreditCards', async (_, { getState }) => {
+  const state = getState();
+  const userId = state.user.id;
+  const response = await fetchCreditCards(userId);
+  return response;
+});
 
 const creditCardsSlice = createSlice({
   name: 'creditCards',
@@ -52,8 +57,7 @@ const creditCardsSlice = createSlice({
         state.status = 'loading';
       })
       .addCase(fetchCreditCardsAsync.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.cards = action.payload;
+        return { ...state, cards: action.payload, status: 'succeeded' };
       })
       .addCase(fetchCreditCardsAsync.rejected, (state, action) => {
         state.status = 'failed';

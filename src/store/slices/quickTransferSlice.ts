@@ -3,6 +3,8 @@ import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/tool
 import type { QuickTransferContact } from '@/types';
 import { fetchQuickTransferContacts } from '@/utils/mockApi';
 
+import { AppDispatch, RootState } from '../store';
+
 interface QuickTransferState {
   contacts: QuickTransferContact[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -15,13 +17,16 @@ const initialState: QuickTransferState = {
   error: null,
 };
 
-export const fetchQuickTransferContactsAsync = createAsyncThunk(
-  'quickTransfer/fetchQuickTransferContacts',
-  async (userId: string) => {
-    const response = await fetchQuickTransferContacts(userId);
-    return response;
-  },
-);
+export const fetchQuickTransferContactsAsync = createAsyncThunk<
+  QuickTransferContact[],
+  void,
+  { state: RootState; dispatch: AppDispatch }
+>('quickTransfer/fetchQuickTransferContacts', async (_, { getState }) => {
+  const state = getState();
+  const userId = state.user.id;
+  const response = await fetchQuickTransferContacts(userId);
+  return response;
+});
 
 const quickTransferSlice = createSlice({
   name: 'quickTransfer',
@@ -40,8 +45,7 @@ const quickTransferSlice = createSlice({
         state.status = 'loading';
       })
       .addCase(fetchQuickTransferContactsAsync.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.contacts = action.payload;
+        return { ...state, contacts: action.payload, status: 'succeeded' };
       })
       .addCase(fetchQuickTransferContactsAsync.rejected, (state, action) => {
         state.status = 'failed';

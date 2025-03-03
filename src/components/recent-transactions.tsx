@@ -12,7 +12,7 @@ import {
   Car,
   Film,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -20,24 +20,17 @@ import { fetchTransactionsAsync } from '@/store/slices/transactionsSlice';
 import type { AppDispatch, RootState } from '@/store/store';
 
 import DashboardContainer from './dashboard-container';
+import RecentTransactionsSkeleton from './recent-transactions-skeleton';
 
 export default function RecentTransactions() {
-  const [isLoading, setIsLoading] = useState(true);
   const dispatch = useDispatch<AppDispatch>();
   const { transactions, status } = useSelector((state: RootState) => state.transactions);
-  const userId = useSelector((state: RootState) => state.user.id);
 
   useEffect(() => {
-    if (status === 'idle' && userId) {
-      dispatch(fetchTransactionsAsync(userId));
+    if (status === 'idle') {
+      dispatch(fetchTransactionsAsync());
     }
-    if (status === 'loading') {
-      setIsLoading(true);
-    }
-    if (status === 'succeeded') {
-      setIsLoading(false);
-    }
-  }, [dispatch, status, userId]);
+  }, [dispatch, status]);
 
   const getTransactionIcon = (type: string) => {
     switch (type.toLowerCase()) {
@@ -64,30 +57,8 @@ export default function RecentTransactions() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <DashboardContainer title="Recent Transactions">
-        <ScrollArea className="h-[300px] pr-4">
-          <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map((index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
-                  <div>
-                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-3 w-16 bg-gray-200 rounded animate-pulse mt-2"></div>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end">
-                  <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
-                  <div className="h-3 w-20 bg-gray-200 rounded animate-pulse mt-2"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </DashboardContainer>
-    );
+  if (status === 'idle' || status === 'loading') {
+    return <RecentTransactionsSkeleton />;
   }
 
   return (
