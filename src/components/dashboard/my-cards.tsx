@@ -4,11 +4,10 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
+import CardCarousel from '@/components/ui/card-carousel';
+import CardsSkeleton from '@/components/ui/skeletons/cards-skeletion';
 import { fetchCreditCardsAsync } from '@/store/slices/creditCardsSlice';
 import type { AppDispatch, RootState } from '@/store/store';
-
-import CardCarousel from '../ui/card-carousel';
-import CardsSkeleton from '../ui/skeletons/cards-skeletion';
 
 export default function MyCards() {
   const navigate = useNavigate();

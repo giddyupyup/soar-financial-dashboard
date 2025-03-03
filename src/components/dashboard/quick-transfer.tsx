@@ -7,13 +7,13 @@ import { useState, useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'sonner';
 
+import ContactAvatar from '@/components/ui/contact-avatar';
+import QuickTransferSkeleton from '@/components/ui/skeletons/quick-transfer-skeleton';
 import { fetchQuickTransferContactsAsync } from '@/store/slices/quickTransferSlice';
 import { addTransaction } from '@/store/slices/transactionsSlice';
 import type { RootState, AppDispatch } from '@/store/store';
 
-import ContactAvatar from '../ui/contact-avatar';
 import DashboardContainer from './dashboard-container';
-import QuickTransferSkeleton from '../ui/skeletons/quick-transfer-skeleton';
 
 export default function QuickTransfer() {
   const [isSending, setIsSending] = useState(false);

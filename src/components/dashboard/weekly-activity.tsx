@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
+import WeeklyActivitySkeleton from '@/components/ui/skeletons/weekly-activity-skeleton';
 import {
   setPreviousWeek,
   setNextWeek,
@@ -15,7 +16,6 @@ import {
 import type { RootState, AppDispatch } from '@/store/store';
 
 import DashboardContainer from './dashboard-container';
-import WeeklyActivitySkeleton from '../ui/skeletons/weekly-activity-skeleton';
 
 Chart.register(...registerables);
 

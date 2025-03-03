@@ -4,12 +4,12 @@ import { Chart, type ChartConfiguration } from 'chart.js/auto';
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import ExpenseStatisticsSkeleton from '@/components/ui/skeletons/expense-statistics-skeleton';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { fetchExpenseStatisticsAsync } from '@/store/slices/expenseStatisticsSlice';
 import type { AppDispatch, RootState } from '@/store/store';
 
 import DashboardContainer from './dashboard-container';
-import ExpenseStatisticsSkeleton from '../ui/skeletons/expense-statistics-skeleton';
 
 export default function ExpenseStatistics() {
   const chartRef = useRef<HTMLCanvasElement>(null);

@@ -16,11 +16,11 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
+import RecentTransactionsSkeleton from '@/components/ui/skeletons/recent-transactions-skeleton';
 import { fetchTransactionsAsync } from '@/store/slices/transactionsSlice';
 import type { AppDispatch, RootState } from '@/store/store';
 
 import DashboardContainer from './dashboard-container';
-import RecentTransactionsSkeleton from '../ui/skeletons/recent-transactions-skeleton';
 
 export default function RecentTransactions() {
   const dispatch = useDispatch<AppDispatch>();

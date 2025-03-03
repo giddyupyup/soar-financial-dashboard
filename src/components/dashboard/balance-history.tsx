@@ -4,10 +4,10 @@ import { Chart, registerables } from 'chart.js';
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import BalanceHistorySkeleton from '@/components/ui/skeletons/balance-history-skeleton';
 import { fetchBalanceHistoryAsync } from '@/store/slices/balanceHistorySlice';
 import type { AppDispatch, RootState } from '@/store/store';
 
-import BalanceHistorySkeleton from '../ui/skeletons/balance-history-skeleton';
 import DashboardContainer from './dashboard-container';
 
 Chart.register(...registerables);
