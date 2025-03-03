@@ -41,9 +41,8 @@ export default function MobileMenuContent({ onClose }: MobileMenuContentProps) {
             const Icon = item.icon;
 
             return (
-              <div className="relative">
+              <div key={item.path} className="relative">
                 <Link
-                  key={item.path}
                   to={item.path}
                   className={`flex text-lg items-center space-x-6 px-8 py-3 ${
                     isActive

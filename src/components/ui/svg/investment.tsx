@@ -6,7 +6,7 @@ const Investment = forwardRef<SVGSVGElement, LucideProps>((props, ref) => {
 
   return (
     <svg ref={ref} width={size} height={size} viewBox="0 0 25 25" fill="none">
-      <g clip-path="url(#clip0_14_1236)">
+      <g clipPath="url(#clip0_14_1236)">
         <path
           d="M3.92074 10.2271H1.1367C0.509043 10.2271 0 10.7362 0 11.3638V23.8638C0 24.4909 0.509043 25 1.1367 25H3.92074C4.5484 25 5.05692 24.4909 5.05692 23.8638V11.3638C5.05692 10.7362 4.5484 10.2271 3.92074 10.2271Z"
           fill={fill}
