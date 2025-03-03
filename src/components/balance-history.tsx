@@ -1,22 +1,39 @@
 'use client';
 
 import { Chart, registerables } from 'chart.js';
-import { useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import type { RootState } from '@/store/store';
+import { fetchBalanceHistoryAsync } from '@/store/slices/balanceHistorySlice';
+import type { AppDispatch, RootState } from '@/store/store';
 
 import DashboardContainer from './dashboard-container';
 
 Chart.register(...registerables);
 
 export default function BalanceHistory() {
+  const [isLoading, setIsLoading] = useState(true);
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
-  const balanceHistory = useSelector((state: RootState) => state.balanceHistory.history);
+
+  const dispatch = useDispatch<AppDispatch>();
+  const { history, status } = useSelector((state: RootState) => state.balanceHistory);
+  const userId = useSelector((state: RootState) => state.user.id);
 
   useEffect(() => {
-    if (chartRef.current && balanceHistory.length > 0) {
+    if (status === 'idle' && userId) {
+      dispatch(fetchBalanceHistoryAsync(userId));
+    }
+    if (status === 'loading') {
+      setIsLoading(true);
+    }
+    if (status === 'succeeded') {
+      setIsLoading(false);
+    }
+  }, [dispatch, status, userId]);
+
+  useEffect(() => {
+    if (chartRef.current && history.length > 0) {
       const ctx = chartRef.current.getContext('2d');
 
       if (ctx) {
@@ -29,11 +46,11 @@ export default function BalanceHistory() {
         chartInstance.current = new Chart(ctx, {
           type: 'line',
           data: {
-            labels: balanceHistory.map((entry) => entry.date),
+            labels: history.map((entry) => entry.date),
             datasets: [
               {
                 label: 'Balance',
-                data: balanceHistory.map((entry) => entry.balance),
+                data: history.map((entry) => entry.balance),
                 borderColor: '#4F7DF3',
                 backgroundColor: 'rgba(79, 125, 243, 0.1)',
                 tension: 0.4,
@@ -97,7 +114,15 @@ export default function BalanceHistory() {
         chartInstance.current.destroy();
       }
     };
-  }, [balanceHistory]);
+  }, [history]);
+
+  if (isLoading) {
+    return (
+      <DashboardContainer title="Balance History">
+        <div className="h-64 bg-gray-200 rounded animate-pulse"></div>
+      </DashboardContainer>
+    );
+  }
 
   return (
     <DashboardContainer title="Balance History">

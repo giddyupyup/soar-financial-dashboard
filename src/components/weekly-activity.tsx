@@ -4,7 +4,7 @@ import { Chart, registerables, type ChartConfiguration } from 'chart.js';
 import { format, getWeek, parseISO, startOfWeek, isSameDay } from 'date-fns';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
@@ -19,6 +19,7 @@ import DashboardContainer from './dashboard-container';
 Chart.register(...registerables);
 
 export default function WeeklyActivity() {
+  const [isLoading, setIsLoading] = useState(true);
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
   const dispatch = useDispatch<AppDispatch>();
@@ -38,6 +39,12 @@ export default function WeeklyActivity() {
     if (status === 'idle' && userId) {
       dispatch(fetchWeeklyActivityAsync(userId));
     }
+    if (status === 'loading') {
+      setIsLoading(true);
+    }
+    if (status === 'succeeded') {
+      setIsLoading(false);
+    }
   }, [dispatch, status, userId]);
 
   useEffect(() => {
@@ -55,16 +62,16 @@ export default function WeeklyActivity() {
             labels: activities.map((activity) => activity.day),
             datasets: [
               {
-                label: 'Withdraw',
-                data: activities.map((activity) => activity.withdraw),
-                backgroundColor: '#000000',
+                label: 'Deposit',
+                data: activities.map((activity) => activity.deposit),
+                backgroundColor: '#4F7DF3',
                 borderRadius: 8,
                 barThickness: 16,
               },
               {
-                label: 'Deposit',
-                data: activities.map((activity) => activity.deposit),
-                backgroundColor: '#4F7DF3',
+                label: 'Withdraw',
+                data: activities.map((activity) => activity.withdraw),
+                backgroundColor: '#000000',
                 borderRadius: 8,
                 barThickness: 16,
               },
@@ -137,14 +144,17 @@ export default function WeeklyActivity() {
     transition-colors duration-200 ease-in-out
   `;
 
-  if (status === 'loading') {
-    return <DashboardContainer title="Weekly Activity">Loading...</DashboardContainer>;
-  }
-
-  if (status === 'failed') {
+  if (isLoading) {
     return (
       <DashboardContainer title="Weekly Activity">
-        Error loading weekly activity data.
+        <div className="animate-pulse">
+          <div className="flex justify-between items-center mb-4">
+            <div className="h-8 w-24 bg-gray-200 rounded"></div>
+            <div className="h-8 w-32 bg-gray-200 rounded"></div>
+            <div className="h-8 w-24 bg-gray-200 rounded"></div>
+          </div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
       </DashboardContainer>
     );
   }

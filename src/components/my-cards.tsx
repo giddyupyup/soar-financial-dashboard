@@ -4,17 +4,20 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import type { RootState } from '@/store/store';
+import { fetchCreditCardsAsync } from '@/store/slices/creditCardsSlice';
+import type { AppDispatch, RootState } from '@/store/store';
 
 import Card from './card';
 
 export default function MyCards() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const cards = useSelector((state: RootState) => state.creditCards.cards);
+  const dispatch = useDispatch<AppDispatch>();
+  const { cards, status } = useSelector((state: RootState) => state.creditCards);
+  const userId = useSelector((state: RootState) => state.user.id);
 
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
@@ -47,12 +50,42 @@ export default function MyCards() {
     }
   }, [emblaApi, updateScrollButtons]);
 
+  useEffect(() => {
+    if (status === 'idle' && userId) {
+      dispatch(fetchCreditCardsAsync(userId));
+    }
+    if (status === 'loading') {
+      setIsLoading(true);
+    }
+    if (status === 'succeeded') {
+      setIsLoading(false);
+    }
+  }, [dispatch, status, userId]);
+
   const handleSeeAll = () => {
     setIsLoading(true);
     setTimeout(() => {
       navigate('/credit-cards');
     }, 500);
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="h-8 w-32 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-8 w-20 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+        <div className="flex space-x-4">
+          {[1, 2].map((index) => (
+            <div
+              key={index}
+              className="w-[350px] h-[235px] bg-gray-200 rounded-xl animate-pulse"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-transparent backdrop-blur-sm rounded-xl p-6">

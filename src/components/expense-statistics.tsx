@@ -1,20 +1,36 @@
 'use client';
 
 import { Chart, type ChartConfiguration } from 'chart.js/auto';
-import { useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { useMediaQuery } from '@/hooks/use-media-query';
-import type { RootState } from '@/store/store';
+import { fetchExpenseStatisticsAsync } from '@/store/slices/expenseStatisticsSlice';
+import type { AppDispatch, RootState } from '@/store/store';
 
 import DashboardContainer from './dashboard-container';
 
 export default function ExpenseStatistics() {
+  const [isLoading, setIsLoading] = useState(true);
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const dispatch = useDispatch<AppDispatch>();
+  const { expenses, status } = useSelector((state: RootState) => state.expenseStatistics);
+  const userId = useSelector((state: RootState) => state.user.id);
 
-  const expenses = useSelector((state: RootState) => state.expenseStatistics.expenses);
+  useEffect(() => {
+    if (status === 'idle' && userId) {
+      dispatch(fetchExpenseStatisticsAsync(userId));
+    }
+    if (status === 'loading') {
+      setIsLoading(true);
+    }
+    if (status === 'succeeded') {
+      setIsLoading(false);
+    }
+  }, [dispatch, status, userId]);
+
   useEffect(() => {
     if (chartRef.current) {
       const ctx = chartRef.current.getContext('2d');
@@ -83,6 +99,15 @@ export default function ExpenseStatistics() {
       }
     };
   }, [isMobile, expenses]);
+
+  if (isLoading) {
+    return (
+      <DashboardContainer title="Expense Statistics">
+        <div
+          className={`${isMobile ? 'h-[300px]' : 'h-[280px]'} bg-gray-200 rounded animate-pulse`}></div>
+      </DashboardContainer>
+    );
+  }
 
   return (
     <DashboardContainer title="Expense Statistics">

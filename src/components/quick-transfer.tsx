@@ -7,6 +7,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'sonner';
 
+import { fetchQuickTransferContactsAsync } from '@/store/slices/quickTransferSlice';
 import { addTransaction } from '@/store/slices/transactionsSlice';
 import type { RootState, AppDispatch } from '@/store/store';
 
@@ -20,13 +21,26 @@ export default function QuickTransfer() {
   const [amount, setAmount] = useState('');
 
   const dispatch = useDispatch<AppDispatch>();
-  const contacts = useSelector((state: RootState) => state.quickTransfer.contacts);
+  const { contacts, status } = useSelector((state: RootState) => state.quickTransfer);
+  const userId = useSelector((state: RootState) => state.user.id);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     loop: true,
     dragFree: true,
   });
+
+  useEffect(() => {
+    if (status === 'idle' && userId) {
+      dispatch(fetchQuickTransferContactsAsync(userId));
+    }
+    if (status === 'loading') {
+      setIsLoading(true);
+    }
+    if (status === 'succeeded') {
+      setIsLoading(false);
+    }
+  }, [dispatch, status, userId]);
 
   const scrollNext = useCallback(() => {
     if (emblaApi) emblaApi.scrollNext();
@@ -87,6 +101,28 @@ export default function QuickTransfer() {
       }, 2000);
     }, 2000);
   };
+
+  if (isLoading) {
+    return (
+      <DashboardContainer title="Quick Transfer">
+        <div className="mb-6 flex space-x-4 overflow-hidden">
+          {[1, 2, 3, 4].map((index) => (
+            <div key={index} className="flex-shrink-0 w-20">
+              <div className="w-16 h-16 bg-gray-200 rounded-full mb-2 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+              <div className="h-3 bg-gray-200 rounded w-3/4 mt-1 animate-pulse"></div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-auto">
+          <div className="flex items-center">
+            <div className="w-24 h-4 bg-gray-200 rounded animate-pulse mr-4"></div>
+            <div className="flex-grow h-10 bg-gray-200 rounded-full animate-pulse"></div>
+          </div>
+        </div>
+      </DashboardContainer>
+    );
+  }
 
   return (
     <DashboardContainer title="Quick Transfer">

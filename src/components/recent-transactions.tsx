@@ -12,15 +12,32 @@ import {
   Car,
   Film,
 } from 'lucide-react';
-import { useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { RootState } from '@/store/store';
+import { fetchTransactionsAsync } from '@/store/slices/transactionsSlice';
+import type { AppDispatch, RootState } from '@/store/store';
 
 import DashboardContainer from './dashboard-container';
 
 export default function RecentTransactions() {
-  const transactions = useSelector((state: RootState) => state.transactions.transactions);
+  const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useDispatch<AppDispatch>();
+  const { transactions, status } = useSelector((state: RootState) => state.transactions);
+  const userId = useSelector((state: RootState) => state.user.id);
+
+  useEffect(() => {
+    if (status === 'idle' && userId) {
+      dispatch(fetchTransactionsAsync(userId));
+    }
+    if (status === 'loading') {
+      setIsLoading(true);
+    }
+    if (status === 'succeeded') {
+      setIsLoading(false);
+    }
+  }, [dispatch, status, userId]);
 
   const getTransactionIcon = (type: string) => {
     switch (type.toLowerCase()) {
@@ -46,6 +63,32 @@ export default function RecentTransactions() {
         return <RefreshCw className="h-5 w-5 text-gray-500" />;
     }
   };
+
+  if (isLoading) {
+    return (
+      <DashboardContainer title="Recent Transactions">
+        <ScrollArea className="h-[300px] pr-4">
+          <div className="space-y-4">
+            {[1, 2, 3, 4, 5].map((index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div>
+                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-3 w-16 bg-gray-200 rounded animate-pulse mt-2"></div>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end">
+                  <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-3 w-20 bg-gray-200 rounded animate-pulse mt-2"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </DashboardContainer>
+    );
+  }
 
   return (
     <DashboardContainer title="Recent Transactions">
