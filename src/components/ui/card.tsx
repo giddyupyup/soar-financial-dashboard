@@ -1,5 +1,6 @@
-import { CreditCard } from 'lucide-react';
 import type { FC } from 'react';
+
+import { ChipBlack, ChipWhite } from './svg';
 
 interface CardProps {
   balance: string;
@@ -14,18 +15,18 @@ const Card: FC<CardProps> = ({ balance, cardHolder, cardNumber, validThru, isBla
   const textColor = isBlack ? 'text-white' : 'text-[#343C6A]';
   const labelColor = isBlack ? 'text-gray-400' : 'text-[#718EBF]';
 
+  const borderColor = isBlack ? 'border-white' : 'border-[#DFEAF2]';
+
   return (
     <div
-      className={`w-[350px] h-[235px] ${bgColor} rounded-3xl flex flex-col justify-between shadow-sm`}>
+      className={`w-[350px] h-[235px] border ${borderColor} ${bgColor} rounded-3xl flex flex-col justify-between shadow-sm`}>
       {/* Top Section */}
       <div className="flex px-6 pt-4 justify-between items-start">
         <div>
           <p className={`${labelColor} text-sm mb-1`}>Balance</p>
           <p className={`${textColor} text-3xl font-semibold`}>{balance}</p>
         </div>
-        <div className={`${isBlack ? 'bg-gray-700' : 'bg-gray-100'} p-2 rounded-lg`}>
-          <CreditCard />
-        </div>
+        <div className={`p-2 rounded-lg`}>{isBlack ? <ChipBlack /> : <ChipWhite />}</div>
       </div>
 
       {/* Middle Section */}
@@ -41,7 +42,7 @@ const Card: FC<CardProps> = ({ balance, cardHolder, cardNumber, validThru, isBla
       </div>
 
       {/* Bottom Section */}
-      <div className="flex justify-between px-6 py-4 items-center border-t-1 border-[#DFEAF2]">
+      <div className={`flex justify-between px-6 py-4 items-center border-t ${borderColor}`}>
         <p className={`${textColor} text-xl tracking-wider font-medium`}>{cardNumber}</p>
         <div className="flex -space-x-2">
           <div

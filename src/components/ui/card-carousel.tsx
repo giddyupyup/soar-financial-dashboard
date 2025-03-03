@@ -5,9 +5,9 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import Card from './card';
-
 import type { CreditCard } from '@/types';
+
+import Card from './card';
 
 interface CardCarouselProps {
   cards: CreditCard[];
