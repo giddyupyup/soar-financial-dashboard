@@ -26,7 +26,7 @@ Before you begin, ensure you have met the following requirements:
 
 ## Installation
 
-1. Clone the repository (when available):
+1. Clone the repository:
 
    ```bash
    git clone https://github.com/giddyupyup/soar-financial-dashboard.git
