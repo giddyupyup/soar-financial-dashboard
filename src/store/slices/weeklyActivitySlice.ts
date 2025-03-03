@@ -26,7 +26,6 @@ export const fetchWeeklyActivityAsync = createAsyncThunk<
   { state: RootState; dispatch: AppDispatch }
 >('weeklyActivity/fetchWeeklyActivity', async (_, { getState }) => {
   const state = getState();
-  console.log('state', { ...state });
   const userId = state.user.id;
   const currentWeekStart = state.weeklyActivity.currentWeekStart;
   return await fetchWeeklyActivity(userId, currentWeekStart);

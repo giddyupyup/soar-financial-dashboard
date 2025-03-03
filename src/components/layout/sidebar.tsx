@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import {
   Home,
   BarChart2,
@@ -57,17 +58,25 @@ export default function Sidebar() {
           const Icon = item.icon;
 
           return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center space-x-3 px-8 py-3 ${
-                isActive
-                  ? 'border-l-6 border-[#232323] text-[#232323]'
-                  : 'text-[#B1B1B1] hover:bg-gray-100'
-              }`}>
-              <Icon className="h-5 w-5" />
-              <span className={isActive ? 'font-medium' : ''}>{item.label}</span>
-            </Link>
+            <div className="relative">
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center space-x-3 px-8 py-3 ${
+                  isActive
+                    ? 'border-l-6 border-[#232323] text-[#232323]'
+                    : 'text-[#B1B1B1] hover:bg-gray-100'
+                }`}>
+                <Icon className="h-5 w-5" />
+                <span className={isActive ? 'font-medium' : ''}>{item.label}</span>
+              </Link>
+              {isActive && (
+                <motion.div
+                  className="absolute top-0 left-0 w-2 h-full rounded-r-lg bg-gray-900"
+                  layoutId="activeMenu"
+                />
+              )}
+            </div>
           );
         })}
       </nav>

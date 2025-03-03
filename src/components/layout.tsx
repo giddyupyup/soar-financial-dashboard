@@ -4,8 +4,8 @@ import { Outlet } from 'react-router-dom';
 
 import { useMediaQuery } from '@/hooks/use-media-query';
 
-import Header from './header';
-import Sidebar from './sidebar';
+import Header from './layout/header';
+import Sidebar from './layout/sidebar';
 
 export default function Layout() {
   const isDesktop = useMediaQuery('(min-width: 1024px)');

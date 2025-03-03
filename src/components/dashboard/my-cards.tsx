@@ -7,8 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { fetchCreditCardsAsync } from '@/store/slices/creditCardsSlice';
 import type { AppDispatch, RootState } from '@/store/store';
 
-import CardCarousel from './card-carousel';
-import CardsSkeleton from './cards-skeletion';
+import CardCarousel from '../ui/card-carousel';
+import CardsSkeleton from '../ui/skeletons/cards-skeletion';
 
 export default function MyCards() {
   const navigate = useNavigate();

@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import Card from '@/components/card';
-import CreditCardsSkeleton from '@/components/credit-cards-skeleton';
+import Card from '@/components/ui/card';
+import CreditCardsSkeleton from '@/components/ui/skeletons/credit-cards-skeleton';
 import { fetchCreditCardsAsync } from '@/store/slices/creditCardsSlice';
 import type { AppDispatch, RootState } from '@/store/store';
 

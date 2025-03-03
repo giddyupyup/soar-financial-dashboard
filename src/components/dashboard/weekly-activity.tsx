@@ -15,7 +15,7 @@ import {
 import type { RootState, AppDispatch } from '@/store/store';
 
 import DashboardContainer from './dashboard-container';
-import WeeklyActivitySkeleton from './weekly-activity-skeleton';
+import WeeklyActivitySkeleton from '../ui/skeletons/weekly-activity-skeleton';
 
 Chart.register(...registerables);
 

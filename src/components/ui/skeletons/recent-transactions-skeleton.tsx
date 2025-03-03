@@ -1,6 +1,6 @@
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-import DashboardContainer from './dashboard-container';
+import DashboardContainer from '../../dashboard/dashboard-container';
 
 export default function RecentTransactionsSkeleton() {
   return (

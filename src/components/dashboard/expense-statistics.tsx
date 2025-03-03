@@ -9,7 +9,7 @@ import { fetchExpenseStatisticsAsync } from '@/store/slices/expenseStatisticsSli
 import type { AppDispatch, RootState } from '@/store/store';
 
 import DashboardContainer from './dashboard-container';
-import ExpenseStatisticsSkeleton from './expense-statistics-skeleton';
+import ExpenseStatisticsSkeleton from '../ui/skeletons/expense-statistics-skeleton';
 
 export default function ExpenseStatistics() {
   const chartRef = useRef<HTMLCanvasElement>(null);

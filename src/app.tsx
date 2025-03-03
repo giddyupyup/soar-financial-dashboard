@@ -9,7 +9,7 @@ import { Toaster } from 'sonner';
 import InitializeStore from '@/components/initialize-store';
 import { store } from '@/store/store';
 
-import LayoutSkeleton from './components/layout-skeleton';
+import LayoutSkeleton from './components/ui/skeletons/layout-skeleton';
 
 const AppRoutes = React.lazy(() => import('@/routes'));
 

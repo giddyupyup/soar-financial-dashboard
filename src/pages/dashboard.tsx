@@ -1,18 +1,18 @@
 import React, { Suspense } from 'react';
 
-import BalanceHistorySkeleton from '@/components/balance-history-skeleton';
-import CardsSkeleton from '@/components/cards-skeletion';
-import ExpenseStatisticsSkeleton from '@/components/expense-statistics-skeleton';
-import QuickTransferSkeleton from '@/components/quick-transfer-skeleton';
-import RecentTransactionsSkeleton from '@/components/recent-transactions-skeleton';
-import WeeklyActivitySkeleton from '@/components/weekly-activity-skeleton';
+import BalanceHistorySkeleton from '@/components/ui/skeletons/balance-history-skeleton';
+import CardsSkeleton from '@/components/ui/skeletons/cards-skeletion';
+import ExpenseStatisticsSkeleton from '@/components/ui/skeletons/expense-statistics-skeleton';
+import QuickTransferSkeleton from '@/components/ui/skeletons/quick-transfer-skeleton';
+import RecentTransactionsSkeleton from '@/components/ui/skeletons/recent-transactions-skeleton';
+import WeeklyActivitySkeleton from '@/components/ui/skeletons/weekly-activity-skeleton';
 
-const BalanceHistory = React.lazy(() => import('@/components/balance-history'));
-const ExpenseStatistics = React.lazy(() => import('@/components/expense-statistics'));
-const MyCards = React.lazy(() => import('@/components/my-cards'));
-const QuickTransfer = React.lazy(() => import('@/components/quick-transfer'));
-const RecentTransactions = React.lazy(() => import('@/components/recent-transactions'));
-const WeeklyActivity = React.lazy(() => import('@/components/weekly-activity'));
+const BalanceHistory = React.lazy(() => import('@/components/dashboard/balance-history'));
+const ExpenseStatistics = React.lazy(() => import('@/components/dashboard/expense-statistics'));
+const MyCards = React.lazy(() => import('@/components/dashboard/my-cards'));
+const QuickTransfer = React.lazy(() => import('@/components/dashboard/quick-transfer'));
+const RecentTransactions = React.lazy(() => import('@/components/dashboard/recent-transactions'));
+const WeeklyActivity = React.lazy(() => import('@/components/dashboard/weekly-activity'));
 
 export default function Dashboard() {
   return (

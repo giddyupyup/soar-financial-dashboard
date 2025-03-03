@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
-import SettingsSkeleton from '@/components/settings-skeleton';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,6 +26,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import SettingsSkeleton from '@/components/ui/skeletons/settings-skeleton';
 import { updateUser } from '@/store/slices/userSlice';
 import { AppDispatch, RootState } from '@/store/store';
 
@@ -77,7 +77,6 @@ export default function Settings() {
   }, [user, form]);
 
   const onSubmit = async (data: FormData) => {
-    console.log('onSubmit function called with data:', data);
     setIsSaving(true);
     try {
       // Simulate API call
@@ -143,7 +142,7 @@ export default function Settings() {
                   {tab.charAt(0).toUpperCase() + tab.slice(1).replace('-', ' ')}
                   {activeTab === tab && (
                     <motion.div
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"
+                      className="absolute bottom-0 left-0 right-0 h-1 rounded-t-lg bg-gray-900"
                       layoutId="activeTab"
                     />
                   )}

@@ -1,6 +1,6 @@
 import { useMediaQuery } from '@/hooks/use-media-query';
 
-import DashboardContainer from './dashboard-container';
+import DashboardContainer from '../../dashboard/dashboard-container';
 
 export default function ExpenseStatisticsSkeleton() {
   const isMobile = useMediaQuery('(max-width: 768px)');

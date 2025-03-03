@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchBalanceHistoryAsync } from '@/store/slices/balanceHistorySlice';
 import type { AppDispatch, RootState } from '@/store/store';
 
-import BalanceHistorySkeleton from './balance-history-skeleton';
+import BalanceHistorySkeleton from '../ui/skeletons/balance-history-skeleton';
 import DashboardContainer from './dashboard-container';
 
 Chart.register(...registerables);

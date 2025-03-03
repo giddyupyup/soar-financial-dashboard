@@ -11,9 +11,9 @@ import { fetchQuickTransferContactsAsync } from '@/store/slices/quickTransferSli
 import { addTransaction } from '@/store/slices/transactionsSlice';
 import type { RootState, AppDispatch } from '@/store/store';
 
-import ContactAvatar from './contact-avatar';
+import ContactAvatar from '../ui/contact-avatar';
 import DashboardContainer from './dashboard-container';
-import QuickTransferSkeleton from './quick-transfer-skeleton';
+import QuickTransferSkeleton from '../ui/skeletons/quick-transfer-skeleton';
 
 export default function QuickTransfer() {
   const [isSending, setIsSending] = useState(false);
