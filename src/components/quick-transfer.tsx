@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'sonner';
 
 import { addTransaction } from '@/store/slices/transactionsSlice';
-import type { RootState } from '@/store/store';
+import type { RootState, AppDispatch } from '@/store/store';
 
 import ContactAvatar from './contact-avatar';
 import DashboardContainer from './dashboard-container';
@@ -19,7 +19,7 @@ export default function QuickTransfer() {
   const [activeContactId, setActiveContactId] = useState<string | null>(null);
   const [amount, setAmount] = useState('525.50');
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const contacts = useSelector((state: RootState) => state.quickTransfer.contacts);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -59,12 +59,13 @@ export default function QuickTransfer() {
         amount: -Number.parseFloat(amount),
         date: new Date().toISOString(),
         description: `Transfer to ${recipient}`,
+        category: 'Transfer',
         icon: '🔄',
         iconBg: 'bg-blue-100',
       };
 
       dispatch(addTransaction(newTransaction));
-      toast.success(`Successfully transferred $${amount} to ${recipient}`);
+      toast.success(`Successfully transferred $${Number(amount).toFixed(2)} to ${recipient}`);
 
       setTimeout(() => {
         setIsSent(false);
@@ -143,7 +144,7 @@ export default function QuickTransfer() {
               {isLoading && (
                 <motion.div
                   key="loading"
-                  className="absolute right-0 top-0 h-full px-6 rounded-full bg-gray-900 text-white flex items-center space-x-2"
+                  className="absolute right-0 top-0 h-full px-6 rounded-full bg-gray-900 text-white flex items-center space-x-2 disabled"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}>
@@ -154,7 +155,7 @@ export default function QuickTransfer() {
               {isSent && (
                 <motion.div
                   key="sent"
-                  className="absolute right-0 top-0 h-full px-6 rounded-full bg-green-500 text-white flex items-center space-x-2"
+                  className="absolute right-0 top-0 h-full px-6 rounded-full bg-green-500 text-white flex items-center space-x-2 disabled"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}>

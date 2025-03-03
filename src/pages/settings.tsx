@@ -1,11 +1,13 @@
 'use client';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Pencil, ChevronDown, Loader2, Upload, User } from 'lucide-react';
+import { Pencil, Loader2, Upload, User } from 'lucide-react';
 import type React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
+import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -15,21 +17,38 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { updateUserProfile } from '@/store/slices/userSlice';
-import type { RootState } from '@/store/store';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { updateUser } from '@/store/slices/userSlice';
+import { AppDispatch, RootState } from '@/store/store';
 
-type FormData = {
-  name: string;
-  userName: string;
-  email: string;
-  password: string;
-  dateOfBirth: string;
-  presentAddress: string;
-  permanentAddress: string;
-  city: string;
-  postalCode: string;
-  country: string;
-};
+const formSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters.'),
+  userName: z.string().min(3, 'Username must be at least 3 characters.'),
+  email: z.string().email('Invalid email address.'),
+  password: z
+    .string()
+    .optional()
+    .refine((value) => {
+      if (!value) return true; // Allow empty password (no change)
+      return validatePassword(value);
+    }, 'Password must be at least 8 characters and contain at least one uppercase letter, one lowercase letter, one number, and one special character.'),
+  dateOfBirth: z.string().min(1, 'Date of birth is required.'),
+  presentAddress: z.string().min(5, 'Present address must be at least 5 characters.'),
+  permanentAddress: z.string().min(5, 'Permanent address must be at least 5 characters.'),
+  city: z.string().min(2, 'City must be at least 2 characters.'),
+  postalCode: z.string().regex(/^\d{5}(-\d{4})?$/, 'Invalid postal code.'),
+  country: z.string().min(2, 'Country must be at least 2 characters.'),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('edit-profile');
@@ -39,64 +58,39 @@ export default function Settings() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm<FormData>({
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      name: user.name,
-      userName: user.userName,
-      email: user.email,
-      password: '**********',
-      dateOfBirth: user.dateOfBirth,
-      presentAddress: user.presentAddress,
-      permanentAddress: user.permanentAddress,
-      city: user.city,
-      postalCode: user.postalCode,
-      country: user.country,
+      ...user,
     },
+    mode: 'onChange', // Enable real-time validation
   });
+
   useEffect(() => {
-    setValue('name', user.name);
-    setValue('userName', user.userName);
-    setValue('email', user.email);
-    setValue('dateOfBirth', user.dateOfBirth);
-    setValue('presentAddress', user.presentAddress);
-    setValue('permanentAddress', user.permanentAddress);
-    setValue('city', user.city);
-    setValue('postalCode', user.postalCode);
-    setValue('country', user.country);
-  }, [user, setValue]);
+    form.reset({ ...user });
+  }, [user, form]);
 
   const onSubmit = async (data: FormData) => {
+    console.log('onSubmit function called with data:', data);
     setIsSaving(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsSaving(false);
-    dispatch(
-      updateUserProfile({
-        name: data.name,
-        userName: data.userName,
-        email: data.email,
-        dateOfBirth: data.dateOfBirth,
-        presentAddress: data.presentAddress,
-        permanentAddress: data.permanentAddress,
-        city: data.city,
-        postalCode: data.postalCode,
-        country: data.country,
-      }),
-    );
-    toast.success('Settings saved successfully!');
-    setIsSaved(true);
-
-    setTimeout(() => {
-      setIsSaved(false);
-    }, 2000);
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await dispatch(updateUser(data)).unwrap(); // Update local state
+      toast.success('Settings saved successfully!');
+      setIsSaved(true);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error('Failed to save settings. Please try again.');
+    } finally {
+      setIsSaving(false);
+      setTimeout(() => {
+        setIsSaved(false);
+      }, 2000);
+    }
   };
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,9 +103,9 @@ export default function Settings() {
 
       // Update profile image (in a real scenario, this would be the URL returned from the server)
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const newAvatarUrl = e.target?.result as string;
-        dispatch(updateUserProfile({ avatar: newAvatarUrl }));
+        await dispatch(updateUser({ avatar: newAvatarUrl })).unwrap();
       };
       reader.readAsDataURL(file);
 
@@ -130,352 +124,320 @@ export default function Settings() {
         <div className="bg-white rounded-xl shadow-sm">
           <div className="border-b border-gray-200">
             <div className="flex space-x-8 px-6">
-              <button
-                className={`cursor-pointer py-4 px-1 relative ${
-                  activeTab === 'edit-profile'
-                    ? 'text-gray-900 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-gray-900 font-medium'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-                onClick={() => setActiveTab('edit-profile')}>
-                Edit Profile
-              </button>
-              <button
-                className={`cursor-pointer py-4 px-1 ${
-                  activeTab === 'preferences'
-                    ? 'text-gray-900 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-gray-900 font-medium'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-                onClick={() => setActiveTab('preferences')}>
-                Preferences
-              </button>
-              <button
-                className={`cursor-pointer py-4 px-1 ${
-                  activeTab === 'security'
-                    ? 'text-gray-900 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-gray-900 font-medium'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-                onClick={() => setActiveTab('security')}>
-                Security
-              </button>
+              {['edit-profile', 'preferences', 'security'].map((tab) => (
+                <button
+                  key={tab}
+                  className={`py-4 px-1 cursor-pointer relative ${
+                    activeTab === tab
+                      ? 'text-gray-900 font-medium'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                  onClick={() => setActiveTab(tab)}>
+                  {tab.charAt(0).toUpperCase() + tab.slice(1).replace('-', ' ')}
+                  {activeTab === tab && (
+                    <motion.div
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"
+                      layoutId="activeTab"
+                    />
+                  )}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="p-6">
             {activeTab === 'edit-profile' && (
-              <form onSubmit={handleSubmit(onSubmit)} className="max-w-6xl mx-auto">
-                <div className="md:flex md:gap-12">
-                  {/* Profile Image Section - Left Side on Desktop */}
-                  <div className="flex flex-col items-center md:items-start mb-8 md:mb-0 md:w-48">
-                    <div className="relative">
-                      {user.avatar ? (
-                        <img
-                          src={user.avatar || '/placeholder.svg'}
-                          alt="Profile"
-                          width={128}
-                          height={128}
-                          className="w-32 h-32 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center">
-                          <User className="h-16 w-16 text-gray-500" />
-                        </div>
-                      )}
-                      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogTrigger asChild>
-                          <button className="absolute bottom-0 right-0 bg-gray-900 text-white p-2 rounded-full hover:bg-gray-800 transition-colors cursor-pointer">
-                            <Pencil className="h-4 w-4" />
-                          </button>
-                        </DialogTrigger>
-                        <DialogContent className="bg-white">
-                          <DialogHeader>
-                            <DialogTitle>Update Profile Picture</DialogTitle>
-                          </DialogHeader>
-                          <div className="mt-4">
-                            <div className="flex items-center justify-center w-full">
-                              <label
-                                htmlFor="dropzone-file"
-                                className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                  <Upload className="w-10 h-10 mb-3 text-gray-400" />
-                                  <p className="mb-2 text-sm text-gray-500">
-                                    <span className="font-semibold">Click to upload</span> or drag
-                                    and drop
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    PNG, JPG or GIF (MAX. 800x400px)
-                                  </p>
-                                </div>
-                                <input
-                                  id="dropzone-file"
-                                  type="file"
-                                  className="hidden"
-                                  accept="image/*"
-                                  onChange={handleFileChange}
-                                  ref={fileInputRef}
-                                />
-                              </label>
-                            </div>
-                            <div className="mt-4 flex justify-end">
-                              <Button
-                                onClick={triggerFileInput}
-                                disabled={isUploading}
-                                className="bg-gray-900 text-white px-8 py-2.5 rounded-full hover:bg-gray-800 transition-colors text-sm font-medium relative overflow-hidden cursor-pointer">
-                                {isUploading ? (
-                                  <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Uploading...
-                                  </>
-                                ) : (
-                                  'Upload'
-                                )}
-                              </Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </div>
-
-                  {/* Form Section - Right Side on Desktop */}
-                  <div className="flex-1">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Your Name
-                        </label>
-                        <input
-                          {...register('name', { required: 'Your name is required' })}
-                          className={`w-full px-4 py-2.5 border ${
-                            errors.name ? 'border-red-500' : 'border-gray-200'
-                          } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600`}
-                          placeholder="Enter your name"
-                        />
-                        {errors.name && (
-                          <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          User Name
-                        </label>
-                        <input
-                          {...register('userName', { required: 'Username is required' })}
-                          className={`w-full px-4 py-2.5 border ${
-                            errors.userName ? 'border-red-500' : 'border-gray-200'
-                          } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600`}
-                          placeholder="Enter username"
-                        />
-                        {errors.userName && (
-                          <p className="mt-1 text-xs text-red-500">{errors.userName.message}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Email
-                        </label>
-                        <input
-                          {...register('email', {
-                            required: 'Email is required',
-                            pattern: {
-                              value: /\S+@\S+\.\S+/,
-                              message: 'Invalid email address',
-                            },
-                          })}
-                          className={`w-full px-4 py-2.5 border ${
-                            errors.email ? 'border-red-500' : 'border-gray-200'
-                          } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600`}
-                          placeholder="Enter email"
-                        />
-                        {errors.email && (
-                          <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Password
-                        </label>
-                        <input
-                          {...register('password', {
-                            required: 'Password is required',
-                            minLength: {
-                              value: 8,
-                              message: 'Password must be at least 8 characters',
-                            },
-                          })}
-                          type="password"
-                          className={`w-full px-4 py-2.5 border ${
-                            errors.password ? 'border-red-500' : 'border-gray-200'
-                          } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600`}
-                          placeholder="Enter password"
-                        />
-                        {errors.password && (
-                          <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Date of Birth
-                        </label>
-                        <div className="relative">
-                          <input
-                            {...register('dateOfBirth', { required: 'Date of birth is required' })}
-                            className={`w-full px-4 py-2.5 border ${
-                              errors.dateOfBirth ? 'border-red-500' : 'border-gray-200'
-                            } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600`}
-                            placeholder="Select date"
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-6xl mx-auto">
+                  <div className="md:flex md:gap-12">
+                    {/* Profile Image Section */}
+                    <div className="flex flex-col items-center md:items-start mb-8 md:mb-0 md:w-48">
+                      <div className="relative">
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar || '/placeholder.svg'}
+                            alt="Profile"
+                            width={128}
+                            height={128}
+                            className="w-32 h-32 rounded-full object-cover"
                           />
-                          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <ChevronDown className="h-4 w-4 text-gray-400" />
+                        ) : (
+                          <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center">
+                            <User className="h-16 w-16 text-gray-500" />
                           </div>
-                        </div>
-                        {errors.dateOfBirth && (
-                          <p className="mt-1 text-xs text-red-500">{errors.dateOfBirth.message}</p>
                         )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Present Address
-                        </label>
-                        <input
-                          {...register('presentAddress', {
-                            required: 'Present address is required',
-                          })}
-                          className={`w-full px-4 py-2.5 border ${
-                            errors.presentAddress ? 'border-red-500' : 'border-gray-200'
-                          } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600`}
-                          placeholder="Enter present address"
-                        />
-                        {errors.presentAddress && (
-                          <p className="mt-1 text-xs text-red-500">
-                            {errors.presentAddress.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Permanent Address
-                        </label>
-                        <input
-                          {...register('permanentAddress', {
-                            required: 'Permanent address is required',
-                          })}
-                          className={`w-full px-4 py-2.5 border ${
-                            errors.permanentAddress ? 'border-red-500' : 'border-gray-200'
-                          } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600`}
-                          placeholder="Enter permanent address"
-                        />
-                        {errors.permanentAddress && (
-                          <p className="mt-1 text-xs text-red-500">
-                            {errors.permanentAddress.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                        <input
-                          {...register('city', { required: 'City is required' })}
-                          className={`w-full px-4 py-2.5 border ${
-                            errors.city ? 'border-red-500' : 'border-gray-200'
-                          } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600`}
-                          placeholder="Enter city"
-                        />
-                        {errors.city && (
-                          <p className="mt-1 text-xs text-red-500">{errors.city.message}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Postal Code
-                        </label>
-                        <input
-                          {...register('postalCode', { required: 'Postal code is required' })}
-                          className={`w-full px-4 py-2.5 border ${
-                            errors.postalCode ? 'border-red-500' : 'border-gray-200'
-                          } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600`}
-                          placeholder="Enter postal code"
-                        />
-                        {errors.postalCode && (
-                          <p className="mt-1 text-xs text-red-500">{errors.postalCode.message}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Country
-                        </label>
-                        <input
-                          {...register('country', { required: 'Country is required' })}
-                          className={`w-full px-4 py-2.5 border ${
-                            errors.country ? 'border-red-500' : 'border-gray-200'
-                          } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600`}
-                          placeholder="Enter country"
-                        />
-                        {errors.country && (
-                          <p className="mt-1 text-xs text-red-500">{errors.country.message}</p>
-                        )}
+                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                          <DialogTrigger asChild>
+                            <button className="absolute bottom-0 right-0 bg-gray-900 text-white p-2 rounded-full hover:bg-gray-800 transition-colors cursor-pointer">
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-white">
+                            <DialogHeader>
+                              <DialogTitle>Update Profile Picture</DialogTitle>
+                            </DialogHeader>
+                            <div className="mt-4">
+                              <div className="flex items-center justify-center w-full">
+                                <label
+                                  htmlFor="dropzone-file"
+                                  className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <Upload className="w-10 h-10 mb-3 text-gray-400" />
+                                    <p className="mb-2 text-sm text-gray-500">
+                                      <span className="font-semibold">Click to upload</span> or drag
+                                      and drop
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      PNG, JPG or GIF (MAX. 800x400px)
+                                    </p>
+                                  </div>
+                                  <input
+                                    id="dropzone-file"
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    ref={fileInputRef}
+                                  />
+                                </label>
+                              </div>
+                              <div className="mt-4 flex justify-end">
+                                <Button
+                                  onClick={triggerFileInput}
+                                  disabled={isUploading}
+                                  className="bg-gray-900 text-white px-8 py-2.5 rounded-full hover:bg-gray-800 transition-colors text-sm font-medium relative overflow-hidden cursor-pointer">
+                                  {isUploading ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      Uploading...
+                                    </>
+                                  ) : (
+                                    'Upload'
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </div>
 
-                    <div className="relative mt-8 flex justify-end">
-                      <AnimatePresence mode="wait">
-                        {!isSaving && !isSaved && (
-                          <motion.button
-                            type="submit"
-                            key="save"
-                            className="bg-gray-900 text-white px-8 py-2.5 rounded-full hover:bg-gray-800 transition-colors text-sm font-medium relative overflow-hidden cursor-pointer"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            disabled={isSaving}>
-                            <span className="opacity-100">Save</span>
-                          </motion.button>
-                        )}
-                        {isSaving && (
-                          <motion.div
-                            key="saving"
-                            className="relative h-full px-8 py-2.5 rounded-full bg-gray-900 text-white flex items-center text-sm font-medium overflow-hidden"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            <span>Saving...</span>
-                          </motion.div>
-                        )}
-                        {isSaved && (
-                          <motion.div
-                            key="saved"
-                            className="relative h-full px-8 py-2.5 rounded-full bg-green-500 text-white flex items-center text-sm font-medium overflow-hidden"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}>
-                            <span>Saved!</span>
-                            <svg
-                              className="h-4 w-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                    {/* Form Section - Right Side on Desktop */}
+                    <div className="flex-1">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Your Name</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="userName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>User Name</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input {...field} type="email" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Password</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  type="password"
+                                  placeholder="••••••••••"
+                                  onChange={(e) => {
+                                    field.onChange(e.target.value);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="dateOfBirth"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Date of Birth</FormLabel>
+                              <FormControl>
+                                <Input {...field} type="date" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="presentAddress"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Present Address</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="permanentAddress"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Permanent Address</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="city"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>City</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="postalCode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Postal Code</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="country"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Country</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="relative mt-8 flex justify-end">
+                        <AnimatePresence mode="wait">
+                          {isSaving && (
+                            <motion.div
+                              key="saving"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2 }}>
+                              <Button
+                                disabled
+                                className="bg-gray-400 text-white px-8 py-2.5 rounded-full">
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Saving...
+                              </Button>
+                            </motion.div>
+                          )}
+                          {isSaved && (
+                            <motion.div
+                              key="saved"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2 }}>
+                              <Button
+                                disabled
+                                className="bg-green-500 text-white px-8 py-2.5 rounded-full">
+                                Saved!
+                                <svg
+                                  className="h-4 w-4 ml-2 inline"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg">
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                              </Button>
+                            </motion.div>
+                          )}
+                          {!isSaving && !isSaved && (
+                            <motion.div
+                              key="save"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2 }}>
+                              <Button
+                                type="submit"
+                                disabled={!form.formState.isValid}
+                                className="bg-gray-900 text-white px-8 py-2.5 rounded-full hover:bg-gray-800 transition-colors">
+                                Save
+                              </Button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </form>
+                </form>
+              </Form>
             )}
 
             {activeTab === 'preferences' && (
@@ -493,5 +455,17 @@ export default function Settings() {
         </div>
       </div>
     </div>
+  );
+}
+
+function validatePassword(password: string): boolean {
+  const minLength = 8;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
+
+  return (
+    password.length >= minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar
   );
 }

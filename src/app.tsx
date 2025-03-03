@@ -8,12 +8,15 @@ import { Toaster } from 'sonner';
 import AppRoutes from '@/routes';
 import { store } from '@/store/store';
 
+import InitializeStore from './components/initialize-store';
+
 export default function App() {
   return (
     <>
       <Toaster />
       <Router>
         <Provider store={store}>
+          <InitializeStore />
           <AppRoutes />
         </Provider>
       </Router>

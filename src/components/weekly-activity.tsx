@@ -7,8 +7,12 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { setPreviousWeek, setNextWeek } from '@/store/slices/weeklyActivitySlice';
-import type { RootState } from '@/store/store';
+import {
+  setPreviousWeek,
+  setNextWeek,
+  fetchWeeklyActivityAsync,
+} from '@/store/slices/weeklyActivitySlice';
+import type { RootState, AppDispatch } from '@/store/store';
 
 import DashboardContainer from './dashboard-container';
 
@@ -17,8 +21,11 @@ Chart.register(...registerables);
 export default function WeeklyActivity() {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
-  const dispatch = useDispatch();
-  const { activities, currentWeekStart } = useSelector((state: RootState) => state.weeklyActivity);
+  const dispatch = useDispatch<AppDispatch>();
+  const { activities, currentWeekStart, status } = useSelector(
+    (state: RootState) => state.weeklyActivity,
+  );
+  const userId = useSelector((state: RootState) => state.user.id);
 
   const currentWeekStartDate = startOfWeek(new Date(), { weekStartsOn: 0 });
   const displayedWeekStart = parseISO(currentWeekStart);
@@ -28,7 +35,13 @@ export default function WeeklyActivity() {
   const year = format(displayedWeekStart, 'yyyy');
 
   useEffect(() => {
-    if (chartRef.current) {
+    if (status === 'idle' && userId) {
+      dispatch(fetchWeeklyActivityAsync(userId));
+    }
+  }, [dispatch, status, userId]);
+
+  useEffect(() => {
+    if (chartRef.current && activities.length > 0) {
       const ctx = chartRef.current.getContext('2d');
 
       if (ctx) {
@@ -123,6 +136,18 @@ export default function WeeklyActivity() {
     focus:outline-none focus:ring-0
     transition-colors duration-200 ease-in-out
   `;
+
+  if (status === 'loading') {
+    return <DashboardContainer title="Weekly Activity">Loading...</DashboardContainer>;
+  }
+
+  if (status === 'failed') {
+    return (
+      <DashboardContainer title="Weekly Activity">
+        Error loading weekly activity data.
+      </DashboardContainer>
+    );
+  }
 
   return (
     <DashboardContainer title="Weekly Activity">

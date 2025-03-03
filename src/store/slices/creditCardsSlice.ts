@@ -1,67 +1,32 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 
-export interface CreditCard {
-  id: string;
-  cardNumber: string;
-  cardHolder: string;
-  expiryDate: string;
-  cvv: string;
-  balance: number;
-  isDefault: boolean;
-}
+import type { CreditCard } from '@/types';
+import { fetchCreditCards } from '@/utils/mockApi';
 
 interface CreditCardsState {
   cards: CreditCard[];
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
 }
 
 const initialState: CreditCardsState = {
-  cards: [
-    {
-      id: '1',
-      cardNumber: '4111 **** **** 1111',
-      cardHolder: 'John Doe',
-      expiryDate: '12/24',
-      cvv: '***',
-      balance: 5000,
-      isDefault: true,
-    },
-    {
-      id: '2',
-      cardNumber: '5555 **** **** 4444',
-      cardHolder: 'John Doe',
-      expiryDate: '06/25',
-      cvv: '***',
-      balance: 2500,
-      isDefault: false,
-    },
-    {
-      id: '3',
-      cardNumber: '3782 **** **** 1000',
-      cardHolder: 'John Doe',
-      expiryDate: '09/26',
-      cvv: '***',
-      balance: 7500,
-      isDefault: false,
-    },
-    {
-      id: '4',
-      cardNumber: '6011 **** **** 2000',
-      cardHolder: 'John Doe',
-      expiryDate: '03/27',
-      cvv: '***',
-      balance: 1000,
-      isDefault: false,
-    },
-  ],
+  cards: [],
+  status: 'idle',
+  error: null,
 };
+
+export const fetchCreditCardsAsync = createAsyncThunk(
+  'creditCards/fetchCreditCards',
+  async (userId: string) => {
+    const response = await fetchCreditCards(userId);
+    return response;
+  },
+);
 
 const creditCardsSlice = createSlice({
   name: 'creditCards',
   initialState,
   reducers: {
-    setCreditCards: (state, action: PayloadAction<CreditCard[]>) => {
-      state.cards = action.payload;
-    },
     addCreditCard: (state, action: PayloadAction<CreditCard>) => {
       state.cards.push(action.payload);
     },
@@ -81,8 +46,22 @@ const creditCardsSlice = createSlice({
       }));
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchCreditCardsAsync.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchCreditCardsAsync.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.cards = action.payload;
+      })
+      .addCase(fetchCreditCardsAsync.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message || 'Failed to fetch credit cards';
+      });
+  },
 });
 
-export const { setCreditCards, addCreditCard, updateCreditCard, removeCreditCard, setDefaultCard } =
+export const { addCreditCard, updateCreditCard, removeCreditCard, setDefaultCard } =
   creditCardsSlice.actions;
 export default creditCardsSlice.reducer;

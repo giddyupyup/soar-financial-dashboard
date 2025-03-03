@@ -1,39 +1,32 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { subMonths, format } from 'date-fns';
+import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 
-interface BalanceHistoryEntry {
-  date: string;
-  balance: number;
-}
+import type { BalanceHistoryEntry } from '@/types';
+import { fetchBalanceHistory } from '@/utils/mockApi';
 
 interface BalanceHistoryState {
   history: BalanceHistoryEntry[];
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
 }
 
-const generateLastSevenMonths = (): BalanceHistoryEntry[] => {
-  const today = new Date();
-  return Array.from({ length: 7 })
-    .map((_, index) => {
-      const date = subMonths(today, index);
-      return {
-        date: format(date, 'MMM'),
-        balance: Math.floor(Math.random() * 5000) + 1000, // Random balance between 1000 and 6000
-      };
-    })
-    .reverse(); // Reverse to have oldest month first
+const initialState: BalanceHistoryState = {
+  history: [],
+  status: 'idle',
+  error: null,
 };
 
-const initialState: BalanceHistoryState = {
-  history: generateLastSevenMonths(),
-};
+export const fetchBalanceHistoryAsync = createAsyncThunk(
+  'balanceHistory/fetchBalanceHistory',
+  async (userId: string) => {
+    const response = await fetchBalanceHistory(userId);
+    return response;
+  },
+);
 
 const balanceHistorySlice = createSlice({
   name: 'balanceHistory',
   initialState,
   reducers: {
-    setBalanceHistory: (state, action: PayloadAction<BalanceHistoryEntry[]>) => {
-      state.history = action.payload;
-    },
     addBalanceEntry: (state, action: PayloadAction<BalanceHistoryEntry>) => {
       state.history.push(action.payload);
       if (state.history.length > 7) {
@@ -41,15 +34,28 @@ const balanceHistorySlice = createSlice({
       }
     },
     updateCurrentMonthBalance: (state, action: PayloadAction<number>) => {
-      const currentMonth = format(new Date(), 'MMM');
+      const currentMonth = new Date().toLocaleString('default', { month: 'short' });
       const index = state.history.findIndex((entry) => entry.date === currentMonth);
       if (index !== -1) {
         state.history[index].balance = action.payload;
       }
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchBalanceHistoryAsync.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchBalanceHistoryAsync.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.history = action.payload;
+      })
+      .addCase(fetchBalanceHistoryAsync.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message || 'Failed to fetch balance history';
+      });
+  },
 });
 
-export const { setBalanceHistory, addBalanceEntry, updateCurrentMonthBalance } =
-  balanceHistorySlice.actions;
+export const { addBalanceEntry, updateCurrentMonthBalance } = balanceHistorySlice.actions;
 export default balanceHistorySlice.reducer;

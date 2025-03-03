@@ -1,11 +1,23 @@
+import { useSelector } from 'react-redux';
+
 import BalanceHistory from '@/components/balance-history';
 import ExpenseStatistics from '@/components/expense-statistics';
 import MyCards from '@/components/my-cards';
 import QuickTransfer from '@/components/quick-transfer';
 import RecentTransactions from '@/components/recent-transactions';
 import WeeklyActivity from '@/components/weekly-activity';
+import type { RootState } from '@/store/store';
 
 export default function Dashboard() {
+  const userStatus = useSelector((state: RootState) => state.user.status);
+
+  if (userStatus === 'loading') {
+    return <div className="p-4 md:p-6">Loading dashboard data...</div>;
+  }
+
+  if (userStatus === 'failed') {
+    return <div className="p-4 md:p-6">Error loading dashboard data. Please try again later.</div>;
+  }
   return (
     <div className="max-w-7xl mx-auto lg:p-6 pb-6">
       <div className="space-y-6">
