@@ -88,6 +88,36 @@ export const fetchCreditCards = async (userId: string): Promise<CreditCard[]> =>
       limit: 10000,
       isDefault: false,
     },
+    {
+      id: '3',
+      cardNumber: `3782 **** **** ${getAmount(1000, 9999)}`,
+      cardHolder: users[userId]?.name || 'Card Holder',
+      expiryDate: getDate(30).slice(2, 7).replace('-', '/') as ExpiryDate,
+      cvv: '***',
+      balance: getAmount(1000, 10000),
+      limit: 20000,
+      isDefault: false,
+    },
+    {
+      id: '4',
+      cardNumber: `6011 **** **** ${getAmount(1000, 9999)}`,
+      cardHolder: users[userId]?.name || 'Card Holder',
+      expiryDate: getDate(42).slice(2, 7).replace('-', '/') as ExpiryDate,
+      cvv: '***',
+      balance: getAmount(1000, 10000),
+      limit: 12000,
+      isDefault: false,
+    },
+    {
+      id: '5',
+      cardNumber: `3528 **** **** ${getAmount(1000, 9999)}`,
+      cardHolder: users[userId]?.name || 'Card Holder',
+      expiryDate: getDate(48).slice(2, 7).replace('-', '/') as ExpiryDate,
+      cvv: '***',
+      balance: getAmount(1000, 10000),
+      limit: 8000,
+      isDefault: false,
+    },
   ];
 };
 

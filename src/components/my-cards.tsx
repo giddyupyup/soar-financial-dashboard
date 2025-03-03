@@ -55,7 +55,7 @@ export default function MyCards() {
   };
 
   return (
-    <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6">
+    <div className="bg-transparent backdrop-blur-sm rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-gray-800">My Cards</h2>
         <motion.button

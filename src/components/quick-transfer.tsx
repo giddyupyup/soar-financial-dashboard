@@ -17,7 +17,7 @@ export default function QuickTransfer() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [activeContactId, setActiveContactId] = useState<string | null>(null);
-  const [amount, setAmount] = useState('525.50');
+  const [amount, setAmount] = useState('');
 
   const dispatch = useDispatch<AppDispatch>();
   const contacts = useSelector((state: RootState) => state.quickTransfer.contacts);
@@ -42,11 +42,24 @@ export default function QuickTransfer() {
     setActiveContactId(id === activeContactId ? null : id);
   };
 
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setAmount(value);
+    }
+  };
+
   const handleSend = () => {
     if (activeContactId === null) {
       toast.error('Please select a contact for the transfer.');
       return;
     }
+
+    if (amount === '' || Number.parseFloat(amount) <= 0) {
+      toast.error('Please enter a valid amount.');
+      return;
+    }
+
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
@@ -70,7 +83,7 @@ export default function QuickTransfer() {
       setTimeout(() => {
         setIsSent(false);
         setActiveContactId(null); // Reset active contact after sending
-        setAmount('525.50'); // Reset amount to default
+        setAmount(''); // Reset amount to default
       }, 2000);
     }, 2000);
   };
@@ -116,27 +129,27 @@ export default function QuickTransfer() {
           <div className="relative flex-grow">
             <input
               type="text"
-              placeholder="525.50"
-              className="w-full px-4 py-2.5 bg-gray-50 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 pr-32"
+              placeholder="Enter amount"
+              className="w-full px-4 py-2.5 bg-gray-50 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-[#232323] pr-32"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={handleAmountChange}
             />
             <AnimatePresence mode="wait">
               {!isLoading && !isSent && (
                 <motion.button
                   key="send"
                   className={`absolute right-0 top-0 h-full px-6 rounded-full flex items-center space-x-2 ${
-                    activeContactId !== null
+                    activeContactId !== null && amount !== ''
                       ? 'bg-gray-900 text-white hover:bg-gray-800'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                   onClick={handleSend}
-                  disabled={activeContactId === null}
+                  disabled={activeContactId === null || amount === ''}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  whileHover={activeContactId !== null ? { scale: 1.05 } : {}}
-                  whileTap={activeContactId !== null ? { scale: 0.95 } : {}}>
+                  whileHover={activeContactId !== null && amount !== '' ? { scale: 1.05 } : {}}
+                  whileTap={activeContactId !== null && amount !== '' ? { scale: 0.95 } : {}}>
                   <span>Send</span>
                   <Send className="h-4 w-4" />
                 </motion.button>
