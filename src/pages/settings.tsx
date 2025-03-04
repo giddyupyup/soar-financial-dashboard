@@ -1,5 +1,6 @@
 'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { format, parseISO } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Pencil, Loader2, Upload, User } from 'lucide-react';
 import type React from 'react';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
+import { Datepicker } from '@/components/ui/date-picker';
 import {
   Dialog,
   DialogContent,
@@ -41,7 +43,9 @@ const formSchema = z.object({
       if (!value) return true; // Allow empty password (no change)
       return validatePassword(value);
     }, 'Password must be at least 8 characters and contain at least one uppercase letter, one lowercase letter, one number, and one special character.'),
-  dateOfBirth: z.string().min(1, 'Date of birth is required.'),
+  dateOfBirth: z.date({
+    required_error: 'Please select a date of birth.',
+  }),
   presentAddress: z.string().min(5, 'Present address must be at least 5 characters.'),
   permanentAddress: z.string().min(5, 'Permanent address must be at least 5 characters.'),
   city: z.string().min(2, 'City must be at least 2 characters.'),
@@ -68,12 +72,16 @@ export default function Settings() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       ...user,
+      dateOfBirth: user.dateOfBirth ? parseISO(user.dateOfBirth) : new Date(),
     },
     mode: 'onChange', // Enable real-time validation
   });
 
   useEffect(() => {
-    form.reset({ ...user });
+    form.reset({
+      ...user,
+      dateOfBirth: user.dateOfBirth ? parseISO(user.dateOfBirth) : new Date(),
+    });
   }, [user, form]);
 
   const onSubmit = async (data: FormData) => {
@@ -81,7 +89,9 @@ export default function Settings() {
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      await dispatch(updateUser(data)).unwrap(); // Update local state
+      await dispatch(
+        updateUser({ ...data, dateOfBirth: format(data.dateOfBirth, 'YYYY-DD-MM') }),
+      ).unwrap(); // Update local state
       toast.success('Settings saved successfully!');
       setIsSaved(true);
     } catch (error) {
@@ -120,7 +130,7 @@ export default function Settings() {
     fileInputRef.current?.click();
   };
 
-  if (status === 'idle' || status === 'loading') {
+  if (status !== 'succeeded') {
     return <SettingsSkeleton />;
   }
 
@@ -302,7 +312,10 @@ export default function Settings() {
                             <FormItem>
                               <FormLabel>Date of Birth</FormLabel>
                               <FormControl>
-                                <Input {...field} type="date" disabled={isSaving || isSaved} />
+                                <Datepicker
+                                  value={field.value}
+                                  onChange={(date) => field.onChange(date)}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
