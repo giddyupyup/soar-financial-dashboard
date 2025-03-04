@@ -20,9 +20,10 @@ import type React from 'react';
 interface DatepickerProps {
   value: Date | undefined;
   onChange: (date: Date | undefined) => void;
+  disabled?: boolean;
 }
 
-export function Datepicker({ value, onChange }: DatepickerProps) {
+export function Datepicker({ value, onChange, disabled = false }: DatepickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(value || new Date());
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -84,8 +85,9 @@ export function Datepicker({ value, onChange }: DatepickerProps) {
     <div className="relative" ref={calendarRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#232323] text-[#232323]">
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        className={`w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#232323] text-[#232323] ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        disabled={disabled}>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <CalendarIcon className="mr-2 h-5 w-5 text-gray-400" />
@@ -95,7 +97,7 @@ export function Datepicker({ value, onChange }: DatepickerProps) {
         </div>
       </button>
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && !disabled && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

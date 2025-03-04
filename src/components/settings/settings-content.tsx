@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Datepicker } from '@/components/ui/date-picker';
+import { Datepicker } from '@/components/ui/datepicker';
 import {
   Dialog,
   DialogContent,
@@ -68,6 +68,8 @@ export default function SettingsContent() {
 
   const { status } = user;
 
+  console.log('user', { ...user });
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -90,7 +92,7 @@ export default function SettingsContent() {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await dispatch(
-        updateUser({ ...data, dateOfBirth: format(data.dateOfBirth, 'YYYY-DD-MM') }),
+        updateUser({ ...data, dateOfBirth: format(data.dateOfBirth, 'yyyy-MM-dd') }),
       ).unwrap(); // Update local state
       toast.success('Settings saved successfully!');
       setIsSaved(true);
@@ -315,6 +317,7 @@ export default function SettingsContent() {
                                 <Datepicker
                                   value={field.value}
                                   onChange={(date) => field.onChange(date)}
+                                  disabled={isSaving || isSaved}
                                 />
                               </FormControl>
                               <FormMessage />
