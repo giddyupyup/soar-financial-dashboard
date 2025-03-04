@@ -17,21 +17,36 @@ import { ChevronLeft, ChevronRight, CalendarIcon, ChevronDown } from 'lucide-rea
 import { useState, useRef, useEffect } from 'react';
 import type React from 'react';
 
-interface DatepickerProps {
+interface DatePickerProps {
   value: Date | undefined;
   onChange: (date: Date | undefined) => void;
+  onBlur: () => void;
   disabled?: boolean;
+  name: string;
 }
 
-export function Datepicker({ value, onChange, disabled = false }: DatepickerProps) {
+export function DatePicker({ value, onChange, onBlur, disabled = false, name }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(value || new Date());
+  const [isMonthOpen, setIsMonthOpen] = useState(false);
+  const [isYearOpen, setIsYearOpen] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setCurrentMonth(value || new Date());
+    if (inputRef.current) {
+      inputRef.current.value = value ? value.toISOString() : '';
+    }
+  }, [value]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setIsMonthOpen(false);
+        setIsYearOpen(false);
+        onBlur();
       }
     }
 
@@ -39,19 +54,30 @@ export function Datepicker({ value, onChange, disabled = false }: DatepickerProp
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [onBlur]);
 
   const days = eachDayOfInterval({
     start: startOfMonth(currentMonth),
     end: endOfMonth(currentMonth),
   });
 
-  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
-  const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
+  const nextMonth = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCurrentMonth(addMonths(currentMonth, 1));
+  };
+
+  const prevMonth = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCurrentMonth(subMonths(currentMonth, 1));
+  };
 
   const handleDateClick = (date: Date) => {
     onChange(date);
+    if (inputRef.current) {
+      inputRef.current.value = date.toISOString();
+    }
     setIsOpen(false);
+    onBlur();
   };
 
   const months = [
@@ -71,21 +97,25 @@ export function Datepicker({ value, onChange, disabled = false }: DatepickerProp
 
   const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
 
-  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newMonth = setMonth(currentMonth, Number.parseInt(event.target.value));
-    setCurrentMonth(newMonth);
+  const handleMonthChange = (monthIndex: number) => {
+    setCurrentMonth(setMonth(currentMonth, monthIndex));
+    setIsMonthOpen(false);
   };
 
-  const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newYear = setYear(currentMonth, Number.parseInt(event.target.value));
-    setCurrentMonth(newYear);
+  const handleYearChange = (year: number) => {
+    setCurrentMonth(setYear(currentMonth, year));
+    setIsYearOpen(false);
   };
 
   return (
     <div className="relative" ref={calendarRef}>
+      <input type="hidden" name={name} ref={inputRef} value={value ? value.toISOString() : ''} />
       <button
         type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.preventDefault();
+          if (!disabled) setIsOpen(!isOpen);
+        }}
         className={`w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#232323] text-[#232323] ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         disabled={disabled}>
         <div className="flex items-center justify-between">
@@ -111,27 +141,27 @@ export function Datepicker({ value, onChange, disabled = false }: DatepickerProp
                 className="p-1 rounded-full hover:bg-gray-100">
                 <ChevronLeft className="h-6 w-6 text-[#232323]" />
               </button>
-              <div className="flex space-x-2">
-                <select
-                  value={currentMonth.getMonth()}
-                  onChange={handleMonthChange}
-                  className="bg-white border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#232323] text-[#232323]">
-                  {months.map((month, index) => (
-                    <option key={month} value={index}>
-                      {month}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={currentMonth.getFullYear()}
-                  onChange={handleYearChange}
-                  className="bg-white border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#232323] text-[#232323]">
-                  {years.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
+              <div className="flex space-x-1">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsMonthOpen(!isMonthOpen);
+                    setIsYearOpen(false);
+                  }}
+                  className="text-lg font-semibold text-[#232323] hover:bg-gray-100 px-2 py-1 rounded">
+                  {format(currentMonth, 'MMMM')}
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsYearOpen(!isYearOpen);
+                    setIsMonthOpen(false);
+                  }}
+                  className="text-lg font-semibold text-[#232323] hover:bg-gray-100 px-2 py-1 rounded">
+                  {format(currentMonth, 'yyyy')}
+                </button>
               </div>
               <button
                 type="button"
@@ -140,6 +170,44 @@ export function Datepicker({ value, onChange, disabled = false }: DatepickerProp
                 <ChevronRight className="h-6 w-6 text-[#232323]" />
               </button>
             </div>
+            {isMonthOpen && (
+              <div className="absolute top-16 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+                <div className="grid grid-cols-3 gap-2">
+                  {months.map((month, index) => (
+                    <button
+                      key={month}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleMonthChange(index);
+                      }}
+                      className={`p-2 rounded ${currentMonth.getMonth() === index ? 'bg-[#232323] text-white' : 'hover:bg-gray-100'}`}>
+                      {month.slice(0, 3)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {isYearOpen && (
+              <div className="absolute top-16 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+                <div className="h-40 overflow-y-auto">
+                  <div className="grid grid-cols-4 gap-2">
+                    {years.map((year) => (
+                      <button
+                        key={year}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleYearChange(year);
+                        }}
+                        className={`p-2 rounded ${currentMonth.getFullYear() === year ? 'bg-[#232323] text-white' : 'hover:bg-gray-100'}`}>
+                        {year}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-7 gap-1">
               {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
                 <div key={day} className="text-center text-gray-500 text-sm">
@@ -150,7 +218,10 @@ export function Datepicker({ value, onChange, disabled = false }: DatepickerProp
                 <button
                   type="button"
                   key={day.toString()}
-                  onClick={() => handleDateClick(day)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDateClick(day);
+                  }}
                   className={`
                     p-2 text-center text-sm rounded-full transition-colors
                     ${!isSameMonth(day, currentMonth) ? 'text-gray-300' : 'text-[#232323]'}

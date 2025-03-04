@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Datepicker } from '@/components/ui/datepicker';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
   Dialog,
   DialogContent,
@@ -78,11 +78,13 @@ export default function SettingsContent() {
   });
 
   useEffect(() => {
-    form.reset({
-      ...user,
-      dateOfBirth: user.dateOfBirth ? parseISO(user.dateOfBirth) : new Date(),
-    });
-  }, [user, form]);
+    if (status === 'succeeded') {
+      form.reset({
+        ...user,
+        dateOfBirth: parseISO(user.dateOfBirth),
+      });
+    }
+  }, [user, form, status]);
 
   const onSubmit = async (data: FormData) => {
     setIsSaving(true);
@@ -130,7 +132,7 @@ export default function SettingsContent() {
     fileInputRef.current?.click();
   };
 
-  if (status !== 'succeeded') {
+  if (status === 'idle' || status === 'loading') {
     return <SettingsSkeleton />;
   }
 
@@ -312,10 +314,12 @@ export default function SettingsContent() {
                             <FormItem>
                               <FormLabel>Date of Birth</FormLabel>
                               <FormControl>
-                                <Datepicker
+                                <DatePicker
                                   value={field.value}
                                   onChange={(date) => field.onChange(date)}
                                   disabled={isSaving || isSaved}
+                                  onBlur={field.onBlur}
+                                  name={field.name}
                                 />
                               </FormControl>
                               <FormMessage />
