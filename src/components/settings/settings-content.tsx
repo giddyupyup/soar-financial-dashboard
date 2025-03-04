@@ -68,8 +68,6 @@ export default function SettingsContent() {
 
   const { status } = user;
 
-  console.log('user', { ...user });
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
