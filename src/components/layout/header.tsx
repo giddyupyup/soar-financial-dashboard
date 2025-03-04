@@ -1,16 +1,14 @@
 'use client';
 
 import { Search, Menu, Settings, Bell, User } from 'lucide-react';
-import { Suspense, useState } from 'react';
-import React from 'react';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
-import MobileMenuSkeleton from '@/components/ui/skeletons/mobile-menu-skeleton';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import type { RootState } from '@/store/store';
 
-const MobileMenu = React.lazy(() => import('./mobile-menu'));
+import MobileMenu from './mobile-menu';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -103,9 +101,7 @@ export default function Header() {
       </header>
 
       {isMobileMenuOpen && (
-        <Suspense fallback={<MobileMenuSkeleton />}>
-          <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
-        </Suspense>
+        <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
       )}
     </>
   );
