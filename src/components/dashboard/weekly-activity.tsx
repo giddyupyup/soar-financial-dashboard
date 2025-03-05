@@ -93,6 +93,10 @@ export default function WeeklyActivity() {
               tooltip: {
                 mode: 'index',
                 intersect: false,
+                callbacks: {
+                  label: (context) =>
+                    `${context.dataset.label}: $${Number(context.formattedValue).toFixed(2)}`,
+                },
               },
             },
             scales: {

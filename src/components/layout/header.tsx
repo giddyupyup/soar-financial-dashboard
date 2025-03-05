@@ -40,29 +40,27 @@ export default function Header() {
             <h1 className="text-2xl font-semibold text-[#2D3B72]">{getPageTitle()}</h1>
           )}
 
-          {isDesktop && (
-            <div className="flex-1 max-w-xl mx-auto px-4">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search for something"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full bg-gray-50 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#232323] focus:border-[#232323]"
-                />
-              </div>
-            </div>
-          )}
-
           <div className="flex items-center gap-2 lg:gap-4">
             {isDesktop && (
               <>
-                <button className="p-2 rounded-full text-gray-600 hover:bg-gray-100 focus:outline-none cursor-pointer">
-                  <Settings className="h-6 w-6" />
+                <div className="flex-1 max-w-xl mx-auto px-4">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search for something"
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full bg-gray-50 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#232323] focus:border-[#232323]"
+                    />
+                  </div>
+                </div>
+                <button className="group p-2 rounded-full text-gray-600 hover:bg-gray-100 focus:outline-none cursor-pointer">
+                  <Settings className="h-6 w-6 group-hover:text-[#396AFF] transition-colors duration-200" />
                 </button>
-                <button className="p-2 rounded-full text-gray-600 hover:bg-gray-100 focus:outline-none cursor-pointer relative">
-                  <Bell className="h-6 w-6" />
+                <button className="group p-2 rounded-full text-gray-600 hover:bg-gray-100 focus:outline-none cursor-pointer relative">
+                  <Bell className="h-6 w-6 group-hover:text-[#396AFF] transition-colors duration-200" />
+                  {/* For when user has active notification */}
                   {/* <span className="absolute top-2 right-2 block h-2.5 w-2.5 rounded-full bg-[#232323] ring-2 ring-white"></span> */}
                 </button>
               </>
@@ -93,7 +91,7 @@ export default function Header() {
               <input
                 type="text"
                 placeholder="Search for something"
-                className="block w-full pl-10 pr-3 py-2.5 rounded-lg bg-gray-50 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#232323]"
+                className="block w-full pl-10 pr-3 py-2.5 rounded-full bg-gray-50 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#232323]"
               />
             </div>
           </div>

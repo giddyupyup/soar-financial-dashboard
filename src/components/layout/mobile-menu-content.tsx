@@ -39,12 +39,6 @@ export default function MobileMenuContent({ onClose }: MobileMenuContentProps) {
     },
   };
 
-  const itemVariants = {
-    hidden: { x: -20, opacity: 0 },
-    visible: { x: 0, opacity: 1 },
-    exit: { x: -20, opacity: 0 },
-  };
-
   return (
     <motion.div
       className="fixed inset-0 z-50 lg:hidden"
@@ -77,7 +71,7 @@ export default function MobileMenuContent({ onClose }: MobileMenuContentProps) {
             const Icon = item.icon;
 
             return (
-              <motion.div key={item.path} className="relative" variants={itemVariants}>
+              <div key={item.path} className="relative">
                 <Link
                   to={item.path}
                   onClick={onClose}
@@ -95,7 +89,7 @@ export default function MobileMenuContent({ onClose }: MobileMenuContentProps) {
                     layoutId="activeMenu"
                   />
                 )}
-              </motion.div>
+              </div>
             );
           })}
         </nav>
