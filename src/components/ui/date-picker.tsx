@@ -170,44 +170,51 @@ export function DatePicker({ value, onChange, onBlur, disabled = false, name }: 
                 <ChevronRight className="h-6 w-6 text-[#232323]" />
               </button>
             </div>
-            {isMonthOpen && (
-              <div className="absolute top-16 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
-                <div className="grid grid-cols-3 gap-2">
-                  {months.map((month, index) => (
-                    <button
-                      key={month}
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleMonthChange(index);
-                      }}
-                      className={`p-2 rounded ${currentMonth.getMonth() === index ? 'bg-[#232323] text-white' : 'hover:bg-gray-100'}`}>
-                      {month.slice(0, 3)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {isYearOpen && (
-              <div className="absolute top-16 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
-                <div className="h-40 overflow-y-auto">
-                  <div className="grid grid-cols-4 gap-2">
-                    {years.map((year) => (
-                      <button
-                        key={year}
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleYearChange(year);
-                        }}
-                        className={`p-2 rounded ${currentMonth.getFullYear() === year ? 'bg-[#232323] text-white' : 'hover:bg-gray-100'}`}>
-                        {year}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+            <AnimatePresence>
+              {(isMonthOpen || isYearOpen) && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute inset-x-4 top-16 bottom-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-20">
+                  {isMonthOpen && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {months.map((month, index) => (
+                        <button
+                          key={month}
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleMonthChange(index);
+                          }}
+                          className={`p-2 rounded ${currentMonth.getMonth() === index ? 'bg-[#232323] text-white' : 'hover:bg-gray-100'}`}>
+                          {month.slice(0, 3)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {isYearOpen && (
+                    <div className="h-full overflow-y-auto">
+                      <div className="grid grid-cols-4 gap-2">
+                        {years.map((year) => (
+                          <button
+                            key={year}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleYearChange(year);
+                            }}
+                            className={`p-2 rounded ${currentMonth.getFullYear() === year ? 'bg-[#232323] text-white' : 'hover:bg-gray-100'}`}>
+                            {year}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
             <div className="grid grid-cols-7 gap-1">
               {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
                 <div key={day} className="text-center text-gray-500 text-sm">
