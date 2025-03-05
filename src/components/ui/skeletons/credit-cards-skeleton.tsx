@@ -1,6 +1,6 @@
 export default function CreditCardsSkeleton() {
   return (
-    <div className="p-4 md:p-6">
+    <div className="p-4 md:p-6 -ml-8">
       <div className="max-w-[1920px] mx-auto">
         <div
           className="grid gap-6"
