@@ -14,8 +14,44 @@ interface MobileMenuContentProps {
 export default function MobileMenuContent({ onClose }: MobileMenuContentProps) {
   const location = useLocation();
 
+  const containerVariants = {
+    hidden: { x: '-100%' },
+    visible: {
+      x: 0,
+      transition: {
+        type: 'spring',
+        stiffness: 300,
+        damping: 30,
+        when: 'beforeChildren',
+        staggerChildren: 0.1,
+      },
+    },
+    exit: {
+      x: '-100%',
+      transition: {
+        type: 'spring',
+        stiffness: 300,
+        damping: 30,
+        when: 'afterChildren',
+        staggerChildren: 0.1,
+        staggerDirection: -1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { x: -20, opacity: 0 },
+    visible: { x: 0, opacity: 1 },
+    exit: { x: -20, opacity: 0 },
+  };
+
   return (
-    <div className="fixed inset-0 z-50 lg:hidden">
+    <motion.div
+      className="fixed inset-0 z-50 lg:hidden"
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      variants={containerVariants}>
       <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={onClose}></div>
 
       <div className="relative flex flex-col w-80 max-w-xs h-full bg-white">
@@ -41,9 +77,10 @@ export default function MobileMenuContent({ onClose }: MobileMenuContentProps) {
             const Icon = item.icon;
 
             return (
-              <div key={item.path} className="relative">
+              <motion.div key={item.path} className="relative" variants={itemVariants}>
                 <Link
                   to={item.path}
+                  onClick={onClose}
                   className={`flex text-lg items-center space-x-6 px-8 py-3 ${
                     isActive
                       ? 'border-l-6 border-[#232323] text-[#232323]'
@@ -58,11 +95,11 @@ export default function MobileMenuContent({ onClose }: MobileMenuContentProps) {
                     layoutId="activeMenu"
                   />
                 )}
-              </div>
+              </motion.div>
             );
           })}
         </nav>
       </div>
-    </div>
+    </motion.div>
   );
 }
